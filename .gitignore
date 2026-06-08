@@ -18,8 +18,10 @@ dist-ssr
 .idea
 .DS_Store
 .env
+.env.*
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+public/uploads/

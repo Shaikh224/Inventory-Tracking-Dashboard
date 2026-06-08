@@ -1,0 +1,154 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+
+body{
+    width: 100%;
+    position: relative;
+    font-family: 'poppins',sans-serif;
+}
+
+::selection{
+    background: black;
+    color: greenyellow;
+}
+/* Navbar styling */
+.navbar {
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2vw;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+/* Logo styling */
+.logo-link {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s;
+}
+
+.logo:hover {
+    transform: scale(1.1);
+}
+
+/* Links container styling */
+.links-container {
+    display: flex;
+    list-style: none;
+}
+
+/* Link item styling */
+.link-item {
+    margin-left: 20px;
+}
+
+.link {
+    padding: 10px 15px;
+    text-decoration: none;
+    text-transform: capitalize;
+    color: #333;
+    transition: color 0.3s, background-color 0.3s;
+    border-radius: 5px;
+}
+
+/* Hover and focus effects for links */
+.link:hover, .link:focus {
+    color: #fff;
+    background-color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 1vw 2vw;
+    }
+
+    .links-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .link-item {
+        margin: 10px 0;
+    }
+}
+.header{
+    margin-top: 60px;
+    width: 100%;
+    height: calc(100vh - 60px);
+    background:gainsboro;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.content{
+    text-align: center;
+}
+.heading{
+    color: rgb(57, 255, 47);
+    text-transform: capitalize;
+    font-size: 80px;
+    line-height: 60px;
+    margin-bottom: 80px;
+
+}
+.heading .small{
+    display: block;
+    font-size: 40px;
+}
+.heading .no-fill{
+    font-style: italic;
+    color: transparent;
+    -webkit-text-stroke: 2px black;
+}
+
+.btn{
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: whitesmoke;
+    color: black;
+    text-decoration: none;
+    text-transform: capitalize;
+}
+.blog-section{
+    width: 100%;
+    padding: 50px 5vw;
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    grid-gap:80px;
+}
+.blog-image{
+    width:100%;
+    height:250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.blog-overviw{
+    margin: 10px 0 20px;
+    list-style: 30px;
+
+}
+
+.btn.dark{
+    background: rgb(57, 255, 47);
+    color: black;
+}
