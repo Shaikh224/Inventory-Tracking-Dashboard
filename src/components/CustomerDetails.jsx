@@ -28,12 +28,11 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { jsPDF } from "jspdf";
-import "jspdf-autotable";
 import Modal from "react-modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { formatINR } from "../lib/format";
+import { buildStatement } from "../lib/pdf";
 import { PageContainer, PageHeading, StatTile, Card } from "./ui";
 import { DEMO_MODE, demoCustomers, demoOrders } from "../lib/demoData";
 
@@ -694,195 +693,32 @@ function CustomerDetails() {
     setEditedItems(updatedItems);
   };
 
-   let logoImage = null;
-    const loadLogoImage = () => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.src = "/logon-vect22.png";
-             img.onload = () => {
-                logoImage = img;
-                resolve();
-            };
-             img.onerror = reject;
-        });
-    };
-    const generatePDF = async () => {
-      try {
-      let logoImage = null; // Declare logoImage within the scope of the function
-      const loadLogoImage = () => {
-        return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = "/logon-vect22.png";
-        img.onload = () => {
-          logoImage = img;
-          resolve();
-        };
-        img.onerror = reject;
-        });
-      };
-    
-      await loadLogoImage(); // Await the promise
-      const doc = new jsPDF();
-      doc.setFont("helvetica", "bold");
-      if (logoImage) {
-        doc.addImage(logoImage, "PNG", 15, 10, 20, 20);
-      }
-      doc.setFontSize(18);
-      doc.setTextColor(22, 160, 133);
-      doc.text("STA Foods & Oils .Co", doc.internal.pageSize.width / 2, 15, {
-        align: "center",
+  const generatePDF = () => {
+    try {
+      const period = [
+        monthFilter
+          ? new Date(0, parseInt(monthFilter) - 1).toLocaleString("default", { month: "long" })
+          : "All months",
+        yearFilter === "all" ? "All years" : yearFilter,
+      ].join("  ·  ");
+
+      const doc = buildStatement({
+        customer,
+        entries: ledgerEntries,
+        totals: {
+          billed: totalOrderAmount,
+          paid: totalPaid,
+          outstanding: totalUnpaid,
+        },
+        period,
       });
-      doc.setFontSize(14);
-      doc.setTextColor(0, 0, 0);
-      doc.text("Hindola Mustard Oil", doc.internal.pageSize.width / 2, 22, {
-        align: "center",
-      });
-      doc.text("Phone: +91 99534 10116", doc.internal.pageSize.width / 2, 27, {
-        align: "center",
-      });
-      doc.text(
-        "Sanjarpur, Azamgarh, Uttar Pradesh",
-        doc.internal.pageSize.width / 2,
-        32,
-        { align: "center" }
-      );
-      doc.text("stafoodsoils@gmail.com", doc.internal.pageSize.width / 2, 37, {
-        align: "center",
-      });
-      doc.line(10, 42, 200, 42);
-      doc.setFontSize(16);
-      doc.setTextColor(22, 160, 133);
-      doc.text("Customer Information", 10, 52);
-      doc.setFontSize(12);
-      doc.setTextColor(0, 0, 0);
-      doc.setFillColor(240, 240, 240);
-      doc.rect(10, 55, 190, 34, "F");
-      doc.text(`Name: ${customer?.name}`, 12, 60);
-      doc.text(`Phone: ${customer?.phoneNumber}`, 12, 65);
-      doc.text(`Address: ${customer?.address}`, 12, 70);
-      doc.setTextColor(22, 160, 133);
-      doc.text(`Total Order Amount: ${totalOrderAmount}`, 12, 75);
-      doc.setTextColor(0, 128, 0);
-      doc.text(`Total Paid: ${totalPaid}`, 12, 80);
-      doc.setTextColor(255, 0, 0);
-      doc.text(`Total Unpaid: ${totalUnpaid}`, 12, 85);
-      doc.line(10, 90, 200, 90);
-      const statusImage =
-        totalUnpaid === 0 ? "/paidstamp.png" : "/paymentdue.png";
-      const img = new Image();
-      img.src = statusImage;
-      await new Promise((resolve) => {
-        img.onload = () => {
-        doc.addImage(img, "PNG", 160, 57, 28, 28);
-        resolve();
-        };
-      });
-      doc.setTextColor(0, 0, 0);
-      doc.text("Order and Payment History:", 10, 95);
-      let yPosition = 100;
-      const tableData = [];
-      let currentMonthYear = "";
-    
-      ledgerEntries.forEach((entry) => {
-        const entryDate = entry.type === "order" ? new Date(entry.date) : entry.paymentDate;
-        const monthYear = `${entryDate.toLocaleString("default", { month: "long" })} ${entryDate.getFullYear()}`;
-    
-        if (monthYear !== currentMonthYear) {
-        currentMonthYear = monthYear;
-        tableData.push({
-          Date: monthYear,
-          "Product Details": "",
-          Amount: "",
-          Paid: "",
-          Comment: "",
-          isHeader: true,
-        });
-        }
-    
-        if (entry.type === "order") {
-        tableData.push({
-          Date: entryDate.toLocaleDateString(),
-          "Product Details": entry.items
-          .map(
-            (item) =>
-            `${item.productName} - qty: ${item.quantity} - price: ${item.price}`
-          )
-          .join("\n"),
-          Amount: `${entry.total}`,
-          Paid: "", // Hide the Paid column for orders
-          Comment: entry.comment || "",
-        });
-        } else if (entry.type === "payment") {
-        tableData.push({
-          Date: entryDate.toLocaleDateString(),
-          "Product Details": "Payment Received",
-          Amount: "",
-          Paid: `${entry.totalPaid}`,
-          Comment: "",
-          isPayment: true,
-        });
-        }
-      });
-    
-      
-    
-      doc.autoTable({
-      startY: yPosition,
-      head: [
-      ["Date", "Product Details", "Amount", "Paid", "Comment"],
-      ],
-      body: tableData.map((item) => [
-      item.Date,
-      item["Product Details"],
-      item.Amount,
-      item.Paid,
-      item.Comment,
-      ]),
-      theme: "grid",
-      styles: {
-      cellPadding: 2,
-      fontSize: 10,
-      halign: "center",
-      valign: "middle",
-      lineColor: [44, 62, 80],
-      lineWidth: 0.1,
-      },
-      headStyles: {
-      fillColor: [22, 160, 133],
-      textColor: 255,
-      fontSize: 10,
-      },
-      columnStyles: {
-      0: { cellWidth: 30 },
-      1: { cellWidth: 70 },
-      2: { cellWidth: 30 },
-      3: { cellWidth: 30 },
-      4: { cellWidth: 23 },
-      },
-      didParseCell: function (data) {
-      if (tableData[data.row.index].isPayment) {
-        data.cell.styles.fillColor = [217,223,198]; // Light green background for payment records
-      }
-      },
-      margin: { top: 5 },
-      });
-      
-      yPosition = doc.autoTable.previous.finalY + 10;
-      doc.setFontSize(10);
-      doc.setTextColor(150, 150, 150);
-      const footerText = `Generated on: ${new Date().toLocaleDateString()} | Thank you for your business! | Page ${doc.internal.getNumberOfPages()}`;
-      doc.text(
-        footerText,
-        doc.internal.pageSize.width / 2,
-        doc.internal.pageSize.height - 10,
-        { align: "center" }
-      );
-      doc.save(`Customer_Details_${customer?.name}.pdf`);
-      } catch (error) {
+      doc.save(`Statement-${(customer?.name || "customer").replace(/\s+/g, "-")}.pdf`);
+      toast.success("Statement downloaded");
+    } catch (error) {
       console.error("Error generating PDF:", error);
-      toast.error("Error generating PDF!");
-      }
-    };
+      toast.error("Could not generate the statement");
+    }
+  };
   return (
     <div className="bg-paper min-h-screen">
      <PageContainer>

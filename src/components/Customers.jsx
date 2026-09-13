@@ -23,7 +23,6 @@ import * as XLSX from "xlsx";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-modal";
-import html2pdf from 'html2pdf.js';
 import { useNavigate } from "react-router-dom";
 import { formatNumber } from "../lib/format";
 import { PageContainer, PageHeading, SectionCard, StatTile, EmptyState, Skeleton } from "./ui";
@@ -354,52 +353,6 @@ function Customers() {
         XLSX.writeFile(workbook, "customers.xlsx");
     };
 
-    const downloadOrderPdf = (customerId) => {
-        const customerOrders = orders.filter((order) => order.customer === customerId);
-        const customerData = customers.find((customer) => customer.id === customerId);
-        const orderHistoryHtml = `
-          <div>
-            <h2>Order History</h2>
-            <p><strong>Customer:</strong> ${customerData.name}</p>
-              <p><strong>Phone:</strong> ${customerData.phoneNumber}</p>
-              <p><strong>Address:</strong> ${customerData.address}</p>
-             <table>
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Total</th>
-                  <th>Amount Paid</th>
-                  <th>Amount Unpaid</th>
-                   <th>Payment Status</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${customerOrders.map((order) => `
-                  <tr>
-                    <td>${order.product}</td>
-                    <td>${order.quantity}</td>
-                    <td>₹${order.total}</td>
-                    <td>₹${order.amountPaid}</td>
-                    <td>₹${order.amountUnpaid}</td>
-                     <td>${order.paymentStatus}</td>
-                    <td>${new Date(order.date).toLocaleDateString()}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
-
-        const element = document.createElement('div');
-        element.innerHTML = orderHistoryHtml;
-        element.style.cssText = 'padding: 20px';
-
-        html2pdf()
-            .from(element)
-            .save(`customer_order_history_${customerId}.pdf`);
-    };
 
 
     const validatePhoneNumber = (number) => {

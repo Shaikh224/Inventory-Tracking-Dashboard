@@ -12,261 +12,164 @@ import {
 } from "firebase/firestore";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 import Modal from "react-modal";
 import { v4 as uuidv4 } from 'uuid';
 import { formatINR } from "../lib/format";
+import { COMPANY, buildInvoice, invoiceFileName, amountInWords, fmtDate } from "../lib/pdf";
 import { PageHeading } from "./ui";
 import { DEMO_MODE, demoCustomers } from "../lib/demoData";
 
 Modal.setAppElement("#root");
 
-const BillTemplate1 = ({ order, id }) => (
-    <div className="space-y-4" id={id}>
-        <div className="text-center mb-4">
-            <h3 className="text-2xl font-bold text-accent">
-                STA Foods & Oils .Co
-            </h3>
-            <p className="text-gray-600 text-lg font-medium">
-                Sanjarpur,Azamgarh,Uttar Pradesh
-            </p>
-            <p className="text-gray-600 text-lg font-medium">
-                Phone: +91 99534 10116 | Email: stafoodsoils@gmail.com
-            </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p className="text-gray-700 font-semibold">
-                    Customer: {order.customerName}
-                </p>
-                <p className="text-gray-700">Order Date: {order.date}</p>
-                <p className="text-gray-700">
-                    Payment Status: <span className="font-semibold">{order.paymentStatus}</span>
-                </p>
-            </div>
-            <div>
-                <p className="text-gray-700">
-                    Bill No: <span className="font-semibold">#{order.billNo}</span>
-                </p>
-                <p className="text-gray-700">
-                    Total: <span className="font-semibold text-green-600">₹{order.total}</span>
-                </p>
-                <p className="text-gray-700">
-                    Amount Paid: <span className="text-green-600">₹{order.amountPaid}</span>
-                </p>
-                <p className="text-gray-700">
-                    Amount Unpaid: <span className="text-red-600">₹{order.amountUnpaid}</span>
-                </p>
-            </div>
-        </div>
-        <div className="my-6">
-            <table
-                className="min-w-full border rounded-lg shadow-sm table-auto"
-                id="billTable"
-            >
-                <thead className="bg-blue-500 text-white">
-                    <tr>
-                        <th className="p-3 font-semibold text-left">Product</th>
-                        <th className="p-3 font-semibold text-right">Quantity</th>
-                        <th className="p-3 font-semibold text-right">Price</th>
-                        <th className="p-3 font-semibold text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {order.items.map((item, index) => (
-                        <tr
-                            key={index}
-                            className={`bg-gray-50 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-100" : ""
-                                }`}
-                        >
-                            <td className="p-3">{item.productName}</td>
-                            <td className="p-3 text-right">{item.quantity}</td>
-                            <td className="p-3 text-right">₹{item.price}</td>
-                            <td className="p-3 text-right font-semibold">
-                                ₹{item.price * item.quantity}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot className="bg-gray-100">
-                    <tr>
-                        <td colSpan="3" className="p-3 font-semibold text-right">
-                            Grand Total:
-                        </td>
-                        <td className="p-3 text-right text-green-600 font-bold">
-                            ₹{order.total}
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <div className="text-center text-sm text-gray-500">
-            <p className="mb-1">Thank you for your business!</p>
-            <p>Please make payment by the due date if applicable.</p>
-        </div>
-    </div>
-);
+const previewMoney = (value) =>
+    "₹" + new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        .format(Number(value) || 0);
 
-const BillTemplate2 = ({ order, id }) => (
-    <div className="space-y-4" id={id}>
-        <div className="text-center mb-4">
-            <h3 className="text-2xl font-bold text-green-500">
-                STA Foods & Oils .Co
-            </h3>
-            <p className="text-gray-600 text-lg font-medium">
-                Sanjarpur,Azamgarh,Uttar Pradesh
-            </p>
-            <p className="text-gray-600 text-lg font-medium">
-                Phone: +91 99534 10116 | Email: stafoodsoils@gmail.com
-            </p>
-        </div>
-        <div className="flex justify-between items-start mb-4">
-            <div>
-                <p className="text-gray-700 font-semibold">
-                    Customer: {order.customerName}
-                </p>
-                <p className="text-gray-700">Order Date: {order.date}</p>
-            </div>
-            <div>
-                <p className="text-gray-700">
-                    Bill No: <span className="font-semibold">#{order.billNo}</span>
-                </p>
-                <p className="text-gray-700">
-                    Payment Status: <span className="font-semibold">{order.paymentStatus}</span>
-                </p>
-            </div>
-        </div>
-        <div className="flex justify-between items-start mb-4">
-            <p className="text-gray-700">
-                Amount Paid: <span className="text-green-600">₹{order.amountPaid}</span>
-            </p>
-            <p className="text-gray-700">
-                Amount Unpaid: <span className="text-red-600">₹{order.amountUnpaid}</span>
-            </p>
-        </div>
-        <div className="my-6">
-            <table
-                className="min-w-full border rounded-lg shadow-sm table-auto"
-                id="billTable"
-            >
-                <thead className="bg-green-500 text-white">
-                    <tr>
-                        <th className="p-3 font-semibold text-left">Product</th>
-                        <th className="p-3 font-semibold text-right">Quantity</th>
-                        <th className="p-3 font-semibold text-right">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {order.items.map((item, index) => (
-                        <tr
-                            key={index}
-                            className={`bg-gray-50 border-b border-gray-200 ${index % 2 === 0 ? "bg-gray-100" : ""
-                                }`}
-                        >
-                            <td className="p-3">{item.productName}</td>
-                            <td className="p-3 text-right">{item.quantity}</td>
-                            <td className="p-3 text-right font-semibold">
-                                ₹{item.price * item.quantity}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-                <tfoot className="bg-gray-100">
-                    <tr>
-                        <td colSpan="2" className="p-3 font-semibold text-right">
-                            Grand Total:
-                        </td>
-                        <td className="p-3 text-right text-green-600 font-bold">
-                            ₹{order.total}
-                        </td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        <div className="text-center text-sm text-gray-500">
-            <p className="mb-1">Thank you for your business!</p>
-            <p>Please make payment by the due date if applicable.</p>
-        </div>
-    </div>
-);
+const statusPill = (status) => {
+    if (status === "Paid") return "bg-mint text-mint-fg";
+    if (status === "Partially Paid") return "bg-tangerine/10 text-tangerine";
+    return "bg-red-50 text-red-600";
+};
 
-function BillModal({ isOpen, onClose, order }) {
+/** On-screen preview — mirrors the generated PDF so what you see is what you send. */
+const InvoicePreview = ({ order, customer, variant }) => {
+    const invoiceNo = String(order.billNo ?? "").slice(0, 8).toUpperCase();
+    const orderDate = order.date ? fmtDate(order.date) : "-";
+    const detailed = variant === "detailed";
+    const due = Number(order.amountUnpaid) || 0;
+
+    return (
+        <div className="border border-ash rounded-xl overflow-hidden">
+            <div className="bg-ink text-white px-5 py-4 flex justify-between items-start gap-4">
+                <div>
+                    <p className="text-body-lg font-semibold">{COMPANY.name}</p>
+                    <p className="text-caption text-silver mt-1">
+                        {COMPANY.tagline} · {COMPANY.address}
+                    </p>
+                    <p className="text-caption text-silver">
+                        {COMPANY.phone} · {COMPANY.email}
+                    </p>
+                </div>
+                <div className="text-right shrink-0">
+                    <p className="text-subheading font-semibold tracking-tight">INVOICE</p>
+                    <p className="text-caption text-silver">No. {invoiceNo}</p>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4">
+                <div className="bg-paper border border-ash rounded-lg p-3">
+                    <p className="text-caption font-semibold text-fog uppercase tracking-wide">Billed to</p>
+                    <p className="text-body font-medium text-charcoal mt-1.5">
+                        {order.customerName || customer?.name || "-"}
+                    </p>
+                    <p className="text-body text-steel">{customer?.phoneNumber || "-"}</p>
+                    <p className="text-body text-steel">{customer?.address || "-"}</p>
+                </div>
+                <div className="bg-paper border border-ash rounded-lg p-3">
+                    <p className="text-caption font-semibold text-fog uppercase tracking-wide">Invoice details</p>
+                    <p className="text-body text-steel mt-1.5">Invoice no: <span className="text-charcoal font-medium">{invoiceNo}</span></p>
+                    <p className="text-body text-steel">Date: <span className="text-charcoal font-medium">{orderDate}</span></p>
+                    <p className="text-body text-steel">
+                        Status:{" "}
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-caption font-medium ${statusPill(order.paymentStatus)}`}>
+                            {order.paymentStatus}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div className="px-4 pb-4">
+                <table className="w-full text-body border border-ash rounded-lg overflow-hidden">
+                    <thead className="bg-ink text-white">
+                        <tr>
+                            <th className="px-3 py-2 text-left font-medium w-10">#</th>
+                            <th className="px-3 py-2 text-left font-medium">Description</th>
+                            <th className="px-3 py-2 text-right font-medium">Qty</th>
+                            {detailed && <th className="px-3 py-2 text-right font-medium">Rate</th>}
+                            <th className="px-3 py-2 text-right font-medium">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {(order.items ?? []).map((item, index) => (
+                            <tr key={index} className="border-t border-ash">
+                                <td className="px-3 py-2 text-steel tabular-nums">{index + 1}</td>
+                                <td className="px-3 py-2 text-charcoal">{item.productName}</td>
+                                <td className="px-3 py-2 text-charcoal text-right tabular-nums">{item.quantity}</td>
+                                {detailed && (
+                                    <td className="px-3 py-2 text-steel text-right tabular-nums">{previewMoney(item.price)}</td>
+                                )}
+                                <td className="px-3 py-2 text-charcoal text-right tabular-nums">
+                                    {previewMoney((Number(item.price) || 0) * (Number(item.quantity) || 0))}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+
+                <div className="flex justify-end mt-3">
+                    <div className="w-full sm:w-72">
+                        <div className="flex justify-between text-body py-1">
+                            <span className="text-steel">Subtotal</span>
+                            <span className="text-charcoal tabular-nums">{previewMoney(order.total)}</span>
+                        </div>
+                        <div className="flex justify-between text-body py-1 border-b border-ash">
+                            <span className="text-steel">Amount paid</span>
+                            <span className="text-charcoal tabular-nums">{previewMoney(order.amountPaid)}</span>
+                        </div>
+                        <div className={`flex justify-between mt-2 px-3 py-2 rounded-lg font-semibold ${due > 0 ? "bg-red-50 text-red-600" : "bg-mint text-mint-fg"}`}>
+                            <span>{due > 0 ? "Balance due" : "Fully paid"}</span>
+                            <span className="tabular-nums">{previewMoney(due)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-ash">
+                    <p className="text-caption font-semibold text-fog uppercase tracking-wide">Amount in words</p>
+                    <p className="text-body text-charcoal mt-1">{amountInWords(order.total)}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+function BillModal({ isOpen, onClose, order, customer }) {
     const [sharing, setSharing] = useState(false);
-    const [selectedTemplate, setSelectedTemplate] = useState("template1");
-    if (!isOpen) return null;
+    const [variant, setVariant] = useState("detailed");
+    if (!isOpen || !order) return null;
 
-    const handleDownloadPDF = async () => {
-        const billElement = document.getElementById(`bill-container-${selectedTemplate}`);
+    // Built natively with jsPDF — vector text, selectable and a fraction of the
+    // size of the html2canvas screenshot this used to produce.
+    const makePdf = () => buildInvoice(order, { variant, customer });
+
+    const handleDownload = () => {
         try {
-            const canvas = await html2canvas(billElement, {
-                scale: 1.5,
-            });
-            const imgData = canvas.toDataURL("image/png");
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4',
-            });
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-            const pdfBlob = pdf.output('blob');
-            return pdfBlob;
+            makePdf().save(invoiceFileName(order));
+            toast.success("Invoice downloaded");
         } catch (error) {
             console.error("Error generating PDF:", error);
-            toast.error("Error generating PDF!");
-            return null;
+            toast.error("Could not generate the invoice");
         }
     };
 
-    const handleShare = async (type) => {
+    const handleShare = async () => {
         setSharing(true);
         try {
-            const pdfBlob = await handleDownloadPDF();
-            if (pdfBlob) {
-                const pdfFile = new File([pdfBlob], "order_bill.pdf", {
-                    type: "application/pdf",
-                });
-                if (type === 'whatsapp' && navigator.share) {
-                    navigator.share({
-                        files: [pdfFile],
-                        title: 'Order Bill',
-                        text: 'Check out this order bill!',
-                    })
-                        .then(() => console.log('Shared via Web Share API'))
-                        .catch((error) => {
-                            console.error('Error sharing via Web Share API:', error);
-                            toast.info("Sharing is not supported on this browser. Kindly share via PDF");
-                        });
-                } else {
-                    const pdfUrl = URL.createObjectURL(pdfFile);
-                    const link = document.createElement('a');
-                    link.href = pdfUrl;
-                    link.download = "order_bill.pdf";
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(pdfUrl);
-                    toast.success('PDF Download Initiated');
-                }
+            const blob = makePdf().output("blob");
+            const file = new File([blob], invoiceFileName(order), { type: "application/pdf" });
+
+            if (navigator.canShare?.({ files: [file] })) {
+                await navigator.share({ files: [file], title: "Invoice", text: "Your invoice" });
+            } else {
+                toast.info("Sharing isn't supported here — downloading instead");
+                makePdf().save(invoiceFileName(order));
+            }
+        } catch (error) {
+            if (error?.name !== "AbortError") {
+                console.error("Error sharing PDF:", error);
+                toast.error("Could not share the invoice");
             }
         } finally {
             setSharing(false);
-        }
-    };
-
-    const renderTemplate = () => {
-        const templateId = `bill-container-${selectedTemplate}`;
-        switch (selectedTemplate) {
-            case "template1":
-                return <BillTemplate1 order={order} id={templateId} />;
-            case "template2":
-                return <BillTemplate2 order={order} id={templateId} />;
-            default:
-                return <BillTemplate1 order={order} id={templateId} />;
         }
     };
 
@@ -278,65 +181,62 @@ function BillModal({ isOpen, onClose, order }) {
             overlayClassName="modal-overlay"
             style={{
                 content: {
-                    maxWidth: '90vw',
+                    maxWidth: '860px',
+                    width: '92vw',
                     maxHeight: '90vh',
                     overflow: 'auto',
                     margin: 'auto',
+                    borderRadius: '12px',
+                    border: '1px solid #e5e5e5',
+                    padding: '20px',
+                },
+                overlay: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    zIndex: 1000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 },
             }}
         >
-            <div className="modal-content p-5 rounded-xl border border-ash bg-canvas relative">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-subheading font-medium text-charcoal">Order Bill</h2>
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+                <h2 className="text-subheading font-medium text-charcoal">Invoice preview</h2>
+                <div className="flex items-center gap-2">
+                    <select
+                        value={variant}
+                        onChange={(e) => setVariant(e.target.value)}
+                        className="border border-ink px-2 py-1.5 rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
+                        aria-label="Invoice layout"
+                    >
+                        <option value="detailed">Detailed (with rates)</option>
+                        <option value="compact">Compact</option>
+                    </select>
                     <button
                         onClick={onClose}
-                        className="text-fog hover:text-red-600 font-bold text-xl leading-none"
+                        className="text-fog hover:text-charcoal px-2 text-xl leading-none"
+                        aria-label="Close"
                     >
                         ×
                     </button>
                 </div>
-                <div className="mb-4">
-                    <label className="block text-caption font-medium text-steel mb-1">
-                        Select Template
-                    </label>
-                    <select
-                        value={selectedTemplate}
-                        onChange={(e) => setSelectedTemplate(e.target.value)}
-                        className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
-                    >
-                        <option value="template1">Template 1</option>
-                        <option value="template2">Template 2</option>
-                    </select>
-                </div>
-                {renderTemplate()}
-                <div className="flex justify-center gap-2 mt-4">
-                    <button
-                        onClick={() => handleShare('pdf')}
-                        disabled={sharing}
-                        className="bg-ink hover:bg-charcoal text-white px-4 py-2 rounded-lg text-body font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {sharing ? (
-                            <span className="flex items-center justify-center">
-                                Generating PDF...
-                            </span>
-                        ) : (
-                            "Download PDF"
-                        )}
-                    </button>
-                    <button
-                        onClick={() => handleShare('whatsapp')}
-                        disabled={sharing}
-                        className="bg-canvas hover:bg-paper text-charcoal border border-ash px-4 py-2 rounded-lg text-body font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {sharing ? (
-                            <span className="flex items-center justify-center">
-                                Sharing...
-                            </span>
-                        ) : (
-                            "Share via WhatsApp"
-                        )}
-                    </button>
-                </div>
+            </div>
+
+            <InvoicePreview order={order} customer={customer} variant={variant} />
+
+            <div className="flex flex-wrap justify-end gap-2 mt-4">
+                <button
+                    onClick={handleShare}
+                    disabled={sharing}
+                    className="bg-canvas hover:bg-paper text-charcoal border border-ash px-4 py-2 rounded-lg text-body font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {sharing ? "Preparing…" : "Share"}
+                </button>
+                <button
+                    onClick={handleDownload}
+                    className="bg-ink hover:bg-charcoal text-white px-4 py-2 rounded-lg text-body font-medium"
+                >
+                    Download PDF
+                </button>
             </div>
         </Modal>
     );
@@ -352,6 +252,7 @@ function Orders() {
     const [amountPaid, setAmountPaid] = useState(0);
     const [isBillModalOpen, setIsBillModalOpen] = useState(false);
     const [currentOrder, setCurrentOrder] = useState(null);
+    const [currentCustomer, setCurrentCustomer] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [totalOrderAmount, setTotalOrderAmount] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -455,6 +356,23 @@ function Orders() {
                     })
                     .filter((item) => item !== null);
 
+                if (DEMO_MODE) {
+                    const demoTotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+                    setCurrentOrder({
+                        billNo: uuidv4(),
+                        customerName: customer.name,
+                        items,
+                        total: demoTotal,
+                        date: new Date(orderDate).toISOString(),
+                        paymentStatus,
+                        amountPaid: paymentStatus === "Paid" ? demoTotal : amountPaid,
+                        amountUnpaid: paymentStatus === "Paid" ? 0 : demoTotal - amountPaid,
+                    });
+                    setCurrentCustomer(customer);
+                    setIsBillModalOpen(true);
+                    return;
+                }
+
                 if (items.length === 0) {
                     return;
                 }
@@ -521,6 +439,7 @@ function Orders() {
                 }
               
                 setCurrentOrder(order);
+                setCurrentCustomer(customer);
                 setIsBillModalOpen(true);
                 resetForm();
             } else {
@@ -574,27 +493,6 @@ function Orders() {
         setAmountPaid(0);
         setSearchQuery("");
         setOrderDate(new Date().toISOString().slice(0, 10));
-    };
-
-    const modalStyles = {
-        content: {
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            margin: 'auto',
-        },
-        overlay: {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            zIndex: 1000,
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            bottom: 0,
-            right: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
     };
 
 
@@ -733,7 +631,7 @@ function Orders() {
                 isOpen={isBillModalOpen}
                 onClose={() => setIsBillModalOpen(false)}
                 order={currentOrder}
-                style={modalStyles}
+                customer={currentCustomer}
             />
           </div>
         </div>
