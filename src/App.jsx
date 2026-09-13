@@ -18,13 +18,17 @@ import "react-toastify/dist/ReactToastify.css";
 function App() {
   const { user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>; // Show loading until auth state is known
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-paper">
+      <p className="text-fog text-body">Loading...</p>
+    </div>
+  ); // Show loading until auth state is known
 
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
       {user && <Header />} {/* Show Header only if user is logged in */}
-      <div className="container mx-auto mt-4">
+      <div className="min-h-screen bg-paper">
         <Routes>
           <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
           <Route path="/" element={<Navigate to="/dashboard" />} />

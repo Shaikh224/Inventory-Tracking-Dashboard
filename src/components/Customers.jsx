@@ -414,29 +414,29 @@ function Customers() {
             customer.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     return (
-        <div className="p-2 sm:p-4 md:p-6 bg-gray-100 rounded-lg shadow-md">
+        <div className="p-3 sm:p-4 md:p-6 bg-canvas rounded-xl border border-ash">
             {loading && <LoadingSpinner />}
             <ToastContainer />
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-2 sm:mb-4 md:mb-6">
+            <h2 className="text-heading-sm sm:text-heading font-medium mb-4 sm:mb-6 text-charcoal tracking-tight">
                 Customers
             </h2>
-            <div className="mb-2 sm:mb-4 flex flex-col sm:flex-row items-center">
+            <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-center gap-2">
                 <input
                     type="text"
                     placeholder="Search by name or area..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border border-gray-300 rounded p-1 sm:p-2 w-full sm:flex-grow text-xs sm:text-sm"
+                    className="border border-ink rounded-md p-2 w-full sm:flex-grow text-body focus:outline-none focus:ring-2 focus:ring-accent"
                 />
-                <button className="mt-1 sm:mt-0 sm:ml-2 p-1 sm:p-2 bg-blue-500 text-white rounded hover:bg-blue-400 text-xs sm:text-sm">
+                <button className="p-2.5 bg-ink text-white rounded-lg hover:bg-charcoal text-body transition-colors">
                     <FaSearch />
                 </button>
             </div>
             <button
                 onClick={handleOpenModal}
-                 className="mb-4 w-full sm:w-auto bg-blue-500 text-white p-1 sm:p-2 rounded hover:bg-blue-400 transition flex items-center justify-center text-xs sm:text-sm"
+                 className="mb-4 w-full sm:w-auto bg-ink text-white px-4 py-2 rounded-lg hover:bg-charcoal transition-colors flex items-center justify-center gap-2 text-body font-medium"
             >
-                <FaUserPlus className="mr-1 sm:mr-2" /> Add Customer
+                <FaUserPlus /> Add Customer
             </button>
             <Modal
                 isOpen={modalIsOpen}
@@ -448,9 +448,10 @@ function Customers() {
                         transform: "translate(-50%, -50%)",
                         width: "95%",
                          maxWidth: "600px",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        border: "1px solid #e5e5e5",
+                        boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
                         overflowY: 'auto',
                          maxHeight: '90vh',
                     },
@@ -463,146 +464,149 @@ function Customers() {
                     },
                 }}
             >
-                <h2 className="text-xl font-semibold mb-2">
+                <h2 className="text-subheading font-medium mb-3 text-charcoal">
                     {editingCustomer ? "Edit Customer" : "Add New Customer"}
                 </h2>
                 <form
                     onSubmit={editingCustomer ? handleUpdateCustomer : handleAddCustomer}
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="flex flex-col">
-                            <label className="mb-1 text-xs">Name</label>
+                            <label className="mb-1 text-caption font-medium text-steel">Name</label>
                             <input
                                 type="text"
-                                className="border border-gray-300 p-1 rounded text-xs"
+                                className="border border-ink p-1.5 rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-xs">Phone Number</label>
+                            <label className="mb-1 text-caption font-medium text-steel">Phone Number</label>
                             <input
                                 type="tel"
-                                className="border border-gray-300 p-1 rounded text-xs"
+                                className="border border-ink p-1.5 rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-xs">Address</label>
+                            <label className="mb-1 text-caption font-medium text-steel">Address</label>
                             <input
                                 type="text"
-                                className="border border-gray-300 p-1 rounded text-xs"
+                                className="border border-ink p-1.5 rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
                                 value={address}
                                 onChange={(e) => setAddress(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-xs">Area</label>
+                            <label className="mb-1 text-caption font-medium text-steel">Area</label>
                             <input
                                 type="text"
-                                className="border border-gray-300 p-1 rounded text-xs"
+                                className="border border-ink p-1.5 rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
                                 value={area}
                                 onChange={(e) => setArea(e.target.value)}
                                 required
                             />
                         </div>
                         <div className="flex flex-col">
-                            <label className="mb-1 text-xs">Customer Type</label>
+                            <label className="mb-1 text-caption font-medium text-steel">Customer Type</label>
                             <select
                                 value={customerType}
                                 onChange={(e) => setCustomerType(e.target.value)}
-                                className="border border-gray-300 p-1 rounded text-xs"
+                                className="border border-ink p-1.5 rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
                             >
                                 <option value="individual">Individual</option>
                                 <option value="business">Business</option>
                             </select>
                         </div>
                     </div>
-                    <div className="mt-2 flex justify-end">
+                    <div className="mt-4 flex justify-end gap-2">
                         <button
                             type="button"
-                             className="mr-1 px-2 py-1 bg-gray-300 text-gray-700 rounded hover:bg-gray-200 transition text-xs"
+                             className="px-3 py-1.5 bg-canvas text-charcoal border border-ash rounded-lg hover:bg-paper transition-colors text-body"
                             onClick={handleCloseModal}
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="bg-blue-500 text-white p-1 rounded hover:bg-blue-400 transition flex items-center justify-center text-xs"
+                            className="bg-ink text-white px-3 py-1.5 rounded-lg hover:bg-charcoal transition-colors flex items-center justify-center gap-1 text-body font-medium"
                         >
-                            {editingCustomer ? <FaEdit className="mr-1" /> : <FaUserPlus className="mr-1" />}
+                            {editingCustomer ? <FaEdit /> : <FaUserPlus />}
                             {editingCustomer ? "Update" : "Add"}
                         </button>
                     </div>
                 </form>
             </Modal>
-            <h3 className="text-sm sm:text-lg font-semibold mb-2 sm:mb-4">
+            <h3 className="text-body-lg font-medium mb-3 sm:mb-4 text-charcoal">
                 Total Customers: {customers.length}
             </h3>
             <button
                 onClick={downloadCustomerData}
-                 className="mb-4 p-1 sm:p-2 bg-green-500 text-white rounded hover:bg-green-400 transition text-xs sm:text-sm"
+                 className="mb-4 flex items-center gap-2 px-3 py-2 bg-canvas text-charcoal border border-ash rounded-lg hover:bg-paper transition-colors text-body"
             >
-                <FaDownload className="mr-1 sm:mr-2" /> Download Customer Data
+                <FaDownload /> Download Customer Data
             </button>
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white border border-gray-300 text-xs sm:text-sm">
+            <div className="overflow-x-auto border border-ash rounded-xl">
+                <table className="min-w-full bg-canvas text-body">
                     <thead>
-                        <tr>
-                             <th className="border px-1 sm:px-2 py-1">#</th>
-                            <th className="border px-1 sm:px-2 py-1">Name</th>
-                            <th className="border px-1 sm:px-2 py-1">Phone</th>
-                            <th className="border px-1 sm:px-2 py-1">Address</th>
-                            <th className="border px-1 sm:px-2 py-1">Area</th>
-                            <th className="border px-1 sm:px-2 py-1">Type</th>
-                            <th className="border px-1 sm:px-2 py-1">Orders</th>
-                            <th className="border px-1 sm:px-2 py-1">Actions</th>
+                        <tr className="text-caption text-fog uppercase tracking-wide">
+                             <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">#</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Name</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Phone</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Address</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Area</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Type</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Orders</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredCustomers.map((customer, index) => (
-                            <tr key={customer.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                <td className="border px-1 sm:px-2 py-1">{index+1}</td>
-                                <td className="border px-1 sm:px-2 py-1">{customer.name}</td>
-                                <td className="border px-1 sm:px-2 py-1">{customer.phoneNumber}</td>
-                                <td className="border px-1 sm:px-2 py-1">{customer.address}</td>
-                                <td className="border px-1 sm:px-2 py-1">{customer.area}</td>
-                                <td
-                                    className={`border px-1 sm:px-2 py-1 font-medium ${customer.customerType === 'business'
-                                        ? 'text-blue-600'
-                                        : 'text-green-600'
+                            <tr key={customer.id} className="hover:bg-paper transition-colors">
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal">{index+1}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal">{customer.name}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-steel">{customer.phoneNumber}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-steel">{customer.address}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-steel">{customer.area}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2">
+                                    <span className={`inline-block px-2.5 py-0.5 rounded-full text-caption font-medium ${customer.customerType === 'business'
+                                        ? 'bg-blue-tint text-accent'
+                                        : 'bg-mint text-mint-fg'
                                         }`}
-                                > {customer.customerType === 'business' ? 'Business' : 'Individual'}
+                                    > {customer.customerType === 'business' ? 'Business' : 'Individual'}
+                                    </span>
                                 </td>
-                                <td className="border px-1 sm:px-2 py-1">
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal">
                                     {
                                         orders.filter((order) => order.customer === customer.id)
                                             .length
                                     }
                                 </td>
-                                <td className="border px-1 sm:px-2 py-1 flex space-x-1">
+                                <td className="border-b border-ash px-2 sm:px-3 py-2">
+                                    <div className="flex gap-2">
                                     <button
                                         onClick={() => handleViewOrders(customer.id)}
-                                        className="text-blue-500 hover:text-blue-400"
+                                        className="text-accent hover:opacity-70"
                                     >
                                         <FaEye size={14} />
                                     </button>
                                     <button
                                         onClick={() => handleEditCustomer(customer)}
-                                        className="text-yellow-500 hover:text-yellow-400"
+                                        className="text-tangerine hover:opacity-70"
                                     >
                                         <FaEdit size={14} />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteConfirm(customer)}
-                                        className="text-red-500 hover:text-red-400"
+                                        className="text-red-500 hover:opacity-70"
                                     >
                                         <FaTrash size={14} />
                                     </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -621,9 +625,10 @@ function Customers() {
                         transform: "translate(-50%, -50%)",
                          width: "90%",
                         maxWidth: "400px",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        border: "1px solid #e5e5e5",
+                        boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
                     },
                     overlay: {
                          background: "rgba(0, 0, 0, 0.7)",
@@ -634,22 +639,22 @@ function Customers() {
                     },
                 }}
             >
-                <h2 className="text-lg font-semibold mb-2 text-center">
+                <h2 className="text-body-lg font-semibold mb-2 text-center text-charcoal">
                     Confirm Customer and Related Data Deletion?
                 </h2>
-                <p className="mb-4 text-center text-xs sm:text-sm">
+                <p className="mb-4 text-center text-body text-steel">
                     Are you sure you want to delete this customer and <br /> all associated orders and payments?
                 </p>
-                <div className="flex justify-center space-x-2">
+                <div className="flex justify-center gap-2">
                     <button
                         onClick={() => setShowDeleteConfirmation(false)}
-                         className="bg-gray-300 text-gray-700 px-2 py-1 rounded w-20 text-xs sm:text-sm"
+                         className="bg-canvas text-charcoal border border-ash px-3 py-1.5 rounded-lg w-20 text-body hover:bg-paper transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleDeleteCustomer}
-                         className="bg-red-500 text-white px-2 py-1 rounded w-20 text-xs sm:text-sm"
+                         className="bg-red-600 text-white px-3 py-1.5 rounded-lg w-20 text-body hover:bg-red-700 transition-colors"
                     >
                         Delete
                     </button>
@@ -667,9 +672,10 @@ function Customers() {
                          transform: "translate(-50%, -50%)",
                         width: "90%",
                         maxWidth: "400px",
-                         padding: "10px",
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                         padding: "16px",
+                        borderRadius: "12px",
+                        border: "1px solid #e5e5e5",
+                        boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
                     },
                     overlay: {
                         background: "rgba(0, 0, 0, 0.7)",
@@ -680,22 +686,22 @@ function Customers() {
                     },
                 }}
             >
-                <h2 className="text-lg font-semibold mb-2 text-center">
+                <h2 className="text-body-lg font-semibold mb-2 text-center text-charcoal">
                     Delete Order?
                 </h2>
-                <p className="mb-4 text-center text-xs sm:text-sm">
+                <p className="mb-4 text-center text-body text-steel">
                     Are you sure you want to delete this order?
                 </p>
-                <div className="flex justify-center space-x-2">
+                <div className="flex justify-center gap-2">
                     <button
                         onClick={() => setShowOrderDeleteConfirmation(false)}
-                        className="bg-gray-300 text-gray-700 px-2 py-1 rounded w-20 text-xs sm:text-sm"
+                        className="bg-canvas text-charcoal border border-ash px-3 py-1.5 rounded-lg w-20 text-body hover:bg-paper transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleDeleteOrder}
-                        className="bg-red-500 text-white px-2 py-1 rounded w-20 text-xs sm:text-sm"
+                        className="bg-red-600 text-white px-3 py-1.5 rounded-lg w-20 text-body hover:bg-red-700 transition-colors"
                     >
                         Delete
                     </button>
@@ -939,9 +945,10 @@ function CustomerDetails({ customerId }) {
                         transform: "translate(-50%, -50%)",
                         width: "90%",
                         maxWidth: "400px",
-                        padding: "10px",
-                        borderRadius: "8px",
-                        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+                        padding: "16px",
+                        borderRadius: "12px",
+                        border: "1px solid #e5e5e5",
+                        boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
                     },
                     overlay: {
                         background: "rgba(0, 0, 0, 0.7)",

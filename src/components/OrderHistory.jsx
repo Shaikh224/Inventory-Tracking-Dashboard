@@ -227,50 +227,52 @@ function OrderHistory() {
     };
 
     return (
-         <div className="p-6 bg-gray-100 min-h-screen">
+         <div className="p-4 sm:p-6 bg-paper min-h-screen">
             {loading && <LoadingSpinner />}
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Order History</h1>
-             <div className="flex flex-wrap items-center mb-4">
-                <div className="mb-2 mr-4">
+            <h1 className="text-heading-sm sm:text-heading font-medium mb-6 text-charcoal tracking-tight">Order History</h1>
+             <div className="flex flex-wrap items-center gap-4 mb-6 bg-canvas border border-ash rounded-xl p-4">
+                <div className="flex items-center gap-2">
                     <input
                         type="text"
                         placeholder="Search by name or phone number"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="p-2 border border-gray-300 rounded mb-2 sm:mb-0 mr-4 text-xs sm:text-base"
+                        className="p-2 border border-ink rounded-md text-body focus:outline-none focus:ring-2 focus:ring-accent"
                     />
-                    <label className="mr-2 text-xs sm:text-base">Show Paid Only:</label>
+                </div>
+                <label className="flex items-center gap-1.5 text-body text-steel">
                     <input
                         type="checkbox"
                         checked={showPaidOnly}
                         onChange={() => setShowPaidOnly(!showPaidOnly)}
-                          className="text-xs sm:text-base"
+                        className="accent-accent"
                     />
-                </div>
-                <div className="mb-2 mr-4">
-                    <label className="ml-4 mr-2 text-xs sm:text-base">Show Unpaid:</label>
+                    Show Paid Only
+                </label>
+                <label className="flex items-center gap-1.5 text-body text-steel">
                     <input
                         type="checkbox"
                         checked={showUnpaid}
                         onChange={() => setShowUnpaid(!showUnpaid)}
-                         className="text-xs sm:text-base"
+                        className="accent-accent"
                     />
-                </div>
-                <div className="mb-2 mr-4">
-                    <label className="ml-4 mr-2 text-xs sm:text-base">Show Partially Paid:</label>
+                    Show Unpaid
+                </label>
+                <label className="flex items-center gap-1.5 text-body text-steel">
                     <input
                         type="checkbox"
                         checked={showPartiallyPaid}
                         onChange={() => setShowPartiallyPaid(!showPartiallyPaid)}
-                        className="text-xs sm:text-base"
+                        className="accent-accent"
                     />
-                </div>
-                <div className="mb-2 mr-4">
-                    <label className="ml-4 mr-2 text-xs sm:text-base">Filter by Month:</label>
+                    Show Partially Paid
+                </label>
+                <div className="flex items-center gap-2">
+                    <label className="text-body text-steel">Month:</label>
                     <select
                         value={monthFilter}
                         onChange={(e) => setMonthFilter(e.target.value)}
-                         className="text-xs sm:text-base border border-gray-300 rounded p-2 bg-gray-50 hover:bg-gray-100"
+                        className="text-body border border-ink rounded-md p-1.5 bg-canvas hover:bg-paper focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                          <option value="">All</option>
                         {[...Array(12).keys()].map((i) => (
@@ -280,12 +282,12 @@ function OrderHistory() {
                         ))}
                     </select>
                 </div>
-                <div className="mb-2 mr-4">
-                    <label className="ml-4 mr-2 text-xs sm:text-base">Filter by Year:</label>
+                <div className="flex items-center gap-2">
+                    <label className="text-body text-steel">Year:</label>
                     <select
                         value={yearFilter}
                         onChange={(e) => setYearFilter(parseInt(e.target.value))}
-                       className="text-xs sm:text-base border border-gray-300 rounded p-2 bg-gray-50 hover:bg-gray-100"
+                        className="text-body border border-ink rounded-md p-1.5 bg-canvas hover:bg-paper focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                         {[2022, 2023, 2024, 2025, 2026, 2027, 2028].map(year => (
                             <option key={year} value={year}>{year}</option>
@@ -294,57 +296,57 @@ function OrderHistory() {
                 </div>
                  <button
                         onClick={downloadExcel}
-                        className="ml-4 bg-blue-500 text-white p-2 rounded text-xs sm:text-base mb-2 sm:mb-0"
+                        className="bg-ink text-white px-3 py-2 rounded-lg text-body font-medium hover:bg-charcoal transition-colors"
                     >
                         Download Excel
                     </button>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white table-auto text-xs sm:text-sm">
+            <div className="overflow-x-auto border border-ash rounded-xl">
+                <table className="min-w-full bg-canvas table-auto text-body">
                     <thead>
-                        <tr>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Customer Name</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Total</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Amount Paid</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Amount Unpaid</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Payment Status</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Order Date</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Order Items</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Payment Records</th>
-                            <th className="border px-2 py-1 sm:px-4 sm:py-2">Actions</th>
+                        <tr className="text-caption text-fog uppercase tracking-wide">
+                            <th className="border-b border-ash px-3 py-2 text-left">Customer Name</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Total</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Amount Paid</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Amount Unpaid</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Payment Status</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Order Date</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Order Items</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Payment Records</th>
+                            <th className="border-b border-ash px-3 py-2 text-left">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filterOrders().map((order) => (
-                            <tr key={order.id}>
-                                <td className="border px-2 py-1 sm:px-4 sm:py-2">{order.customerName}</td>
-                                <td className="border px-2 py-1 sm:px-4 sm:py-2 text-green-500">
+                            <tr key={order.id} className="hover:bg-paper transition-colors">
+                                <td className="border-b border-ash px-3 py-2 text-charcoal">{order.customerName}</td>
+                                <td className="border-b border-ash px-3 py-2 text-mint-fg font-medium">
                                     ₹{order.total.toFixed(2)}
                                 </td>
-                                <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                                <td className="border-b border-ash px-3 py-2 text-charcoal">
                                     {`₹${order.amountPaid.toFixed(2)}`}
                                 </td>
-                                <td className="border px-2 py-1 sm:px-4 sm:py-2 text-red-500">
+                                <td className="border-b border-ash px-3 py-2 text-red-600">
                                     ₹{order.amountUnpaid.toFixed(2)}
                                 </td>
-                                 <td className="border px-2 py-1 sm:px-4 sm:py-2 flex items-center">
+                                 <td className="border-b border-ash px-3 py-2">
                                   {order.paymentStatus === "Paid" ? (
-                                    <span className="text-green-500 flex items-center">
-                      <FaCheckCircle /> Paid
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-mint text-mint-fg text-caption font-medium">
+                      <FaCheckCircle size={10} /> Paid
                     </span>
                                   ) : order.paymentStatus === "Unpaid" ? (
-                                    <span className="text-red-500 flex items-center">
-                      <FaTimesCircle /> Unpaid
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-caption font-medium">
+                      <FaTimesCircle size={10} /> Unpaid
                     </span>
                                   ) : (
-                                    <span className="text-orange-500">Partially Paid</span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-tangerine/10 text-tangerine text-caption font-medium">Partially Paid</span>
                                   )}
                                 </td>
-                                <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                                <td className="border-b border-ash px-3 py-2 text-steel">
                                     {new Date(order.date).toISOString().slice(0, 10)}
                                 </td>
-                                <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                                <td className="border-b border-ash px-3 py-2 text-steel">
                                     {order.items.map((item, index) => (
                                         <div key={index}>
                                             <p>
@@ -353,7 +355,7 @@ function OrderHistory() {
                                         </div>
                                     ))}
                                 </td>
-                                   <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                                   <td className="border-b border-ash px-3 py-2 text-steel">
                                        {Array.isArray(order.paymentRecords) ? (
                                             order.paymentRecords.map((record, index) => (
                                               <div key={index}>
@@ -367,15 +369,15 @@ function OrderHistory() {
                                           )}
                                         <Link
                                           to={`/customer/${order.customer}`}
-                                          className="bg-green-500 text-white px-2 py-1 rounded mt-1 inline-block text-xs sm:text-base"
+                                          className="bg-canvas text-accent border border-ash px-2 py-1 rounded-lg mt-1 inline-block hover:bg-paper transition-colors"
                                         >
                                           <FaPlusCircle />
                                         </Link>
                                     </td>
-                                    <td className="border px-2 py-1 sm:px-4 sm:py-2">
+                                    <td className="border-b border-ash px-3 py-2">
                                         <button
                                             onClick={() => handleDeleteConfirm(order.id)}
-                                            className="bg-red-500 text-white px-2 py-1 rounded text-xs sm:text-base"
+                                            className="bg-canvas text-red-600 border border-ash px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
                                         >
                                             Delete
                                         </button>
@@ -388,24 +390,24 @@ function OrderHistory() {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-                        <h2 className="text-xl font-bold mb-4 text-gray-800">
+                <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                    <div className="bg-canvas rounded-xl border border-ash shadow-card p-6 w-96">
+                        <h2 className="text-body-lg font-semibold mb-3 text-charcoal">
                             Confirm Delete
                         </h2>
-                        <p className="mb-4 text-gray-700">
+                        <p className="mb-4 text-body text-steel">
                             Are you sure you want to delete this order?
                         </p>
-                        <div className="flex justify-end">
+                        <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 text-xs sm:text-base"
+                                className="bg-canvas text-charcoal border border-ash px-3 py-1.5 rounded-lg text-body hover:bg-paper transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDeleteOrder}
-                                className="bg-red-500 text-white px-4 py-2 rounded text-xs sm:text-base"
+                                className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-body hover:bg-red-700 transition-colors"
                             >
                                 Delete
                             </button>

@@ -21,95 +21,103 @@ function Header() {
     setIsOpen(!isOpen);
   };
 
+  const navLinkClass = ({ isActive }) =>
+    `px-4 py-2 rounded-full text-body font-medium transition-colors ${
+      isActive ? "text-ink bg-paper" : "text-slate hover:text-ink hover:bg-paper"
+    }`;
+
   return (
-    <nav className="bg-gray-900 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center p-4">
-        <NavLink className="text-white font-bold text-2xl" to="/dashboard">
-          Dashboard
+    <nav className="bg-canvas border-b border-ash">
+      <div className="max-w-[1200px] mx-auto flex justify-between items-center px-4 sm:px-6 py-3">
+        <NavLink className="text-charcoal font-medium text-subheading tracking-tight" to="/dashboard">
+          Inventory<span className="text-accent">.</span>
         </NavLink>
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex items-center gap-1">
           {user && (
             <>
-              <NavLink className="text-gray-300 hover:text-white px-3 py-2 rounded" to="/customers">
+              <NavLink className={navLinkClass} to="/customers">
                 Customers
               </NavLink>
-              <NavLink className="text-gray-300 hover:text-white px-3 py-2 rounded" to="/inventory">
+              <NavLink className={navLinkClass} to="/inventory">
                 Inventory
               </NavLink>
-              <NavLink className="text-gray-300 hover:text-white px-3 py-2 rounded" to="/orders">
+              <NavLink className={navLinkClass} to="/orders">
                 Orders
               </NavLink>
-              <NavLink className="text-gray-300 hover:text-white px-3 py-2 rounded" to="/orderhistory">
+              <NavLink className={navLinkClass} to="/orderhistory">
                 Order History
               </NavLink>
-              <NavLink className="text-gray-300 hover:text-white px-3 py-2 rounded" to="/expense">
+              <NavLink className={navLinkClass} to="/expense">
                 Expense
               </NavLink>
-              <button onClick={handleLogout} className="text-gray-300 hover:text-white px-3 py-2 rounded">
+              <button
+                onClick={handleLogout}
+                className="ml-2 px-4 py-2 rounded-lg text-body font-medium bg-canvas text-charcoal border border-ash hover:bg-paper transition-colors"
+              >
                 Logout
               </button>
             </>
           )}
         </div>
-        
+
         {/* Mobile Menu Button */}
         <button
           onClick={toggleMenu}
-          className="md:hidden text-gray-300 hover:text-white focus:outline-none transition-colors duration-200"
+          className="md:hidden text-charcoal hover:text-accent focus:outline-none transition-colors duration-200"
         >
-          {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+          {isOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-gray-800 transition-all duration-300 ease-in-out">
-          <div className="flex flex-col p-4">
+        <div className="md:hidden bg-canvas border-t border-ash transition-all duration-300 ease-in-out">
+          <div className="flex flex-col p-3 gap-1">
             {user && (
               <>
                 <NavLink
-                  className="text-gray-300 hover:text-white transition-colors duration-200 px-3 py-2 rounded mb-2"
+                  className={navLinkClass}
                   to="/customers"
-                  onClick={toggleMenu} // Close menu after navigation
+                  onClick={toggleMenu}
                 >
                   Customers
                 </NavLink>
                 <NavLink
-                  className="text-gray-300 hover:text-white transition-colors duration-200 px-3 py-2 rounded mb-2"
+                  className={navLinkClass}
                   to="/inventory"
                   onClick={toggleMenu}
                 >
                   Inventory
                 </NavLink>
                 <NavLink
-                  className="text-gray-300 hover:text-white transition-colors duration-200 px-3 py-2 rounded mb-2"
+                  className={navLinkClass}
                   to="/orders"
                   onClick={toggleMenu}
                 >
                   Orders
                 </NavLink>
                 <NavLink
-                  className="text-gray-300 hover:text-white transition-colors duration-200 px-3 py-2 rounded mb-2"
+                  className={navLinkClass}
                   to="/orderhistory"
                   onClick={toggleMenu}
                 >
                   Order History
                 </NavLink>
                 <NavLink
-                  className="text-gray-300 hover:text-white transition-colors duration-200 px-3 py-2 rounded mb-2"
+                  className={navLinkClass}
                   to="/expense"
                   onClick={toggleMenu}
                 >
                   Expense
                 </NavLink>
-                <hr className="border-gray-700 my-3" />
+                <hr className="border-ash my-2" />
                 <button
                   onClick={() => {
                     handleLogout();
-                    toggleMenu(); // Close menu on logout
+                    toggleMenu();
                   }}
-                  className="text-gray-300 hover:text-white transition-colors duration-200 px-3 py-2 rounded"
+                  className="px-4 py-2 rounded-lg text-body font-medium bg-canvas text-charcoal border border-ash hover:bg-paper transition-colors text-left"
                 >
                   Logout
                 </button>

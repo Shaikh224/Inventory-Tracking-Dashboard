@@ -171,86 +171,90 @@ const Expenses = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Expenses</h1>
+    <div className="p-4 sm:p-6 bg-paper min-h-screen">
+      <h1 className="text-heading-sm sm:text-heading font-medium mb-6 text-charcoal tracking-tight">Expenses</h1>
 
       {/* Filter by month and year */}
-      <div className="mb-4 flex items-center">
-        <label
-          htmlFor="filterMonth"
-          className="block text-sm font-medium text-gray-700 mr-2"
-        >
-          Filter by Month:
-        </label>
-        <select
-          id="filterMonth"
-          value={filterMonth}
-          onChange={(e) => setFilterMonth(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value={null}>All</option>
-          <option value="1">January</option>
-          <option value="2">February</option>
-          <option value="3">March</option>
-          <option value="4">April</option>
-          <option value="5">May</option>
-          <option value="6">June</option>
-          <option value="7">July</option>
-          <option value="8">August</option>
-          <option value="9">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">December</option>
-        </select>
+      <div className="mb-4 flex flex-wrap items-center gap-4 bg-canvas border border-ash rounded-xl p-4">
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="filterMonth"
+            className="text-body text-steel"
+          >
+            Month:
+          </label>
+          <select
+            id="filterMonth"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            className="rounded-md border border-ink bg-canvas py-1.5 px-2 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+            <option value={null}>All</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </div>
 
-        <label
-          htmlFor="filterYear"
-          className="block text-sm font-medium text-gray-700 mr-2"
-        >
-          Filter by Year:
-        </label>
-        <select
-          id="filterYear"
-          value={filterYear}
-          onChange={(e) => setFilterYear(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          {/* Populate year options dynamically - Last 2 years and next 3 years */}
-          {Array.from(
-            { length: 7 },
-            (_, i) => new Date().getFullYear() + i - 2
-          ).map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="filterYear"
+            className="text-body text-steel"
+          >
+            Year:
+          </label>
+          <select
+            id="filterYear"
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="rounded-md border border-ink bg-canvas py-1.5 px-2 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+          >
+            {/* Populate year options dynamically - Last 2 years and next 3 years */}
+            {Array.from(
+              { length: 7 },
+              (_, i) => new Date().getFullYear() + i - 2
+            ).map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Search by item name or supplier */}
+        <div className="flex items-center gap-2 flex-grow">
+          <label
+            htmlFor="searchTerm"
+            className="text-body text-steel"
+          >
+            Search:
+          </label>
+          <input
+            type="text"
+            id="searchTerm"
+            placeholder="Search by item name or supplier"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="rounded-md border border-ink bg-canvas py-1.5 px-2 text-body flex-grow focus:outline-none focus:ring-2 focus:ring-accent"
+          />
+        </div>
       </div>
 
-      {/* Search by item name or supplier */}
-      <div className="mb-4 flex items-center">
-        <label
-          htmlFor="searchTerm"
-          className="block text-sm font-medium text-gray-700 mr-2"
-        >
-          Search:
-        </label>
-        <input
-          type="text"
-          id="searchTerm"
-          placeholder="Search by item name or supplier"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-        <h2 className="text-xl font-bold mb-4">Add Expense</h2>
+      <div className="bg-canvas p-5 rounded-xl border border-ash mb-6">
+        <h2 className="text-subheading font-medium mb-4 text-charcoal">Add Expense</h2>
         <div className="mb-4">
           <label
             htmlFor="itemName"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-caption font-medium text-steel mb-1"
           >
             Item Name:
           </label>
@@ -260,13 +264,13 @@ const Expenses = () => {
             placeholder="Item Name"
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
         <div className="mb-4">
           <label
             htmlFor="quantity"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-caption font-medium text-steel mb-1"
           >
             Quantity:
           </label>
@@ -276,13 +280,13 @@ const Expenses = () => {
             placeholder="Quantity"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
         <div className="mb-4">
           <label
             htmlFor="totalAmount"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-caption font-medium text-steel mb-1"
           >
             Total Amount:
           </label>
@@ -292,13 +296,13 @@ const Expenses = () => {
             placeholder="Total Amount"
             value={totalAmount}
             onChange={(e) => setTotalAmount(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
         <div className="mb-4">
           <label
             htmlFor="paidAmount"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-caption font-medium text-steel mb-1"
           >
             Paid Amount:
           </label>
@@ -308,13 +312,13 @@ const Expenses = () => {
             placeholder="Paid Amount"
             value={paidAmount}
             onChange={(e) => setPaidAmount(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
         <div className="mb-4">
           <label
             htmlFor="supplier"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-caption font-medium text-steel mb-1"
           >
             Supplier:
           </label>
@@ -324,32 +328,32 @@ const Expenses = () => {
             placeholder="Supplier"
             value={supplier}
             onChange={(e) => setSupplier(e.target.value)}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           />
         </div>
         <button
           onClick={handleAddExpense}
-          className="bg-blue-500 text-white p-2 rounded"
+          className="bg-ink text-white px-4 py-2 rounded-lg font-medium hover:bg-charcoal transition-colors"
         >
           Add Expense
         </button>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Expense List</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border table-auto">
+      <div className="bg-canvas p-5 rounded-xl border border-ash">
+        <h2 className="text-subheading font-medium mb-4 text-charcoal">Expense List</h2>
+        <div className="overflow-x-auto border border-ash rounded-xl">
+          <table className="min-w-full table-auto text-body">
             <thead>
-              <tr>
-                <th className="border p-2">Item Name</th>
-                <th className="border p-2">Quantity</th>
-                <th className="border p-2">Total Amount</th>
-                <th className="border p-2">Paid Amount</th>
-                <th className="border p-2">Unpaid Amount</th>
-                <th className="border p-2">Status</th>
-                <th className="border p-2">Supplier</th>
-                <th className="border p-2">Date</th>
-                <th className="border p-2">Actions</th>
+              <tr className="text-caption text-fog uppercase tracking-wide">
+                <th className="border-b border-ash p-2 text-left">Item Name</th>
+                <th className="border-b border-ash p-2 text-left">Quantity</th>
+                <th className="border-b border-ash p-2 text-left">Total Amount</th>
+                <th className="border-b border-ash p-2 text-left">Paid Amount</th>
+                <th className="border-b border-ash p-2 text-left">Unpaid Amount</th>
+                <th className="border-b border-ash p-2 text-left">Status</th>
+                <th className="border-b border-ash p-2 text-left">Supplier</th>
+                <th className="border-b border-ash p-2 text-left">Date</th>
+                <th className="border-b border-ash p-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -357,13 +361,13 @@ const Expenses = () => {
                 (
                   item // Render filteredExpenses
                 ) => (
-                  <tr key={item.id}>
-                    <td className="border p-2">{item.itemName}</td>
-                    <td className="border p-2">{item.quantity}</td>
-                    <td className="border p-2">
+                  <tr key={item.id} className="hover:bg-paper transition-colors">
+                    <td className="border-b border-ash p-2 text-charcoal">{item.itemName}</td>
+                    <td className="border-b border-ash p-2 text-charcoal">{item.quantity}</td>
+                    <td className="border-b border-ash p-2 text-charcoal">
                       ₹{(item.totalAmount || 0).toFixed(2)}
                     </td>
-                    <td className="border p-2">
+                    <td className="border-b border-ash p-2">
                       <input
                         type="number"
                         value={item.paidAmount}
@@ -373,31 +377,31 @@ const Expenses = () => {
                             parseFloat(e.target.value)
                           )
                         }
-                        className="border p-1 rounded w-24"
+                        className="border border-ink p-1 rounded-md w-24 focus:outline-none focus:ring-2 focus:ring-accent"
                       />
                     </td>
-                    <td className="border p-2">
+                    <td className="border-b border-ash p-2 text-charcoal">
                       ₹{(item.unpaidAmount || 0).toFixed(2)}
                     </td>
-                    <td className="border p-2 flex items-center">
+                    <td className="border-b border-ash p-2">
                       {item.status === "Paid" ? (
-                        <span className="text-green-500 flex items-center">
-                          <FaCheckCircle /> Paid
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-mint text-mint-fg text-caption font-medium">
+                          <FaCheckCircle size={10} /> Paid
                         </span>
                       ) : item.status === "Unpaid" ? (
-                        <span className="text-red-500 flex items-center">
-                          <FaTimesCircle /> Unpaid
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-caption font-medium">
+                          <FaTimesCircle size={10} /> Unpaid
                         </span>
                       ) : (
-                        <span className="text-orange-500">Partially Paid</span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-tangerine/10 text-tangerine text-caption font-medium">Partially Paid</span>
                       )}
                     </td>
-                    <td className="border p-2">{item.supplier}</td>
-                    <td className="border p-2">{formatDate(item.date)}</td>
-                    <td className="border p-2">
+                    <td className="border-b border-ash p-2 text-steel">{item.supplier}</td>
+                    <td className="border-b border-ash p-2 text-steel">{formatDate(item.date)}</td>
+                    <td className="border-b border-ash p-2">
                       <button
                         onClick={() => handleDeleteConfirm(item.id)}
-                        className="bg-red-500 text-white px-2 py-1 rounded"
+                        className="bg-canvas text-red-600 border border-ash px-2 py-1 rounded-lg hover:bg-red-50 transition-colors"
                       >
                         Delete
                       </button>
@@ -411,7 +415,7 @@ const Expenses = () => {
       </div>
       <button
         onClick={downloadExcel}
-        className="mt-4 bg-green-500 text-white p-2 rounded"
+        className="mt-4 bg-canvas text-charcoal border border-ash px-4 py-2 rounded-lg font-medium hover:bg-paper transition-colors"
       >
         Download Excel
       </button>
@@ -427,29 +431,30 @@ const Expenses = () => {
             margin: "auto",
             height: "250px",
             padding: "20px",
-            borderRadius: "8px",
-            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+            borderRadius: "12px",
+            border: "1px solid #e5e5e5",
+            boxShadow: "rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px",
           },
           overlay: {
-            background: "rgba(0, 0, 0, 0.7)",
+            background: "rgba(0, 0, 0, 0.5)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
           },
         }}
       >
-        <h2 className="text-lg font-semibold mb-4">Delete Expense?</h2>
-        <p className="mb-4">Are you sure you want to delete this expense?</p>
-        <div className="flex justify-end">
+        <h2 className="text-body-lg font-semibold mb-3 text-charcoal">Delete Expense?</h2>
+        <p className="mb-4 text-body text-steel">Are you sure you want to delete this expense?</p>
+        <div className="flex justify-end gap-2">
           <button
             onClick={() => setShowDeleteConfirmation(false)}
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
+            className="bg-canvas text-charcoal border border-ash px-3 py-1.5 rounded-lg text-body hover:bg-paper transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleDeleteExpense}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-red-600 text-white px-3 py-1.5 rounded-lg text-body hover:bg-red-700 transition-colors"
           >
             Delete
           </button>

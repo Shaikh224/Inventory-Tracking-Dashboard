@@ -163,20 +163,20 @@ function Dashboard() {
   }, [selectedYear, selectedMonth]); // Dependencies for month filter
 
   return (
-       <div className="p-6 bg-gray-100 min-h-screen">
+       <div className="p-4 sm:p-6 bg-paper min-h-screen">
             {loading && <LoadingSpinner />}
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
+            <h1 className="text-heading-sm sm:text-heading font-medium mb-6 text-charcoal tracking-tight">Dashboard</h1>
       {/* Year and Month Filters */}
-      <div className="flex gap-4 mb-4">
+      <div className="flex gap-4 mb-6">
         <div>
-          <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-            Year:
+          <label htmlFor="year" className="block text-caption font-medium text-steel mb-1">
+            Year
           </label>
           <select
             id="year"
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           >
             {/* Generate year options from 2020 to the current year */}
             {Array.from({ length: 10 }, (_, i) => i + 2020).map((year) => (
@@ -187,8 +187,8 @@ function Dashboard() {
           </select>
         </div>
         <div>
-          <label htmlFor="month" className="block text-sm font-medium text-gray-700">
-            Month:
+          <label htmlFor="month" className="block text-caption font-medium text-steel mb-1">
+            Month
           </label>
           <select
             id="month"
@@ -201,7 +201,7 @@ function Dashboard() {
                 setSelectedMonth(null);
               }
             }}
-            className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           >
             <option value={null}>All Months</option>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
@@ -214,105 +214,107 @@ function Dashboard() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Total Sales</h3>
-            <p className="text-2xl font-bold">{totalSales}</p>
+            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Sales</h3>
+            <p className="text-heading-sm font-medium text-charcoal">{totalSales}</p>
           </div>
-          <MdShoppingCart className="text-blue-500 text-4xl" />
+          <MdShoppingCart className="text-accent text-3xl" />
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Total Revenue</h3>
-            <p className="text-2xl text-green-600 font-bold">₹{totalRevenue.toFixed(2)}</p>
+            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Revenue</h3>
+            <p className="text-heading-sm text-mint-fg font-medium">₹{totalRevenue.toFixed(2)}</p>
           </div>
-          <MdAttachMoney className="text-green-500 text-4xl" />
+          <MdAttachMoney className="text-mint-fg text-3xl" />
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Total Customers</h3>
-            <p className="text-2xl font-bold">{totalCustomers}</p>
+            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Customers</h3>
+            <p className="text-heading-sm font-medium text-charcoal">{totalCustomers}</p>
           </div>
-          <MdGroup className="text-yellow-500 text-4xl" />
+          <MdGroup className="text-tangerine text-3xl" />
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Total Inventory</h3>
-            <p className="text-2xl font-bold">{totalInventory}</p>
+            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Inventory</h3>
+            <p className="text-heading-sm font-medium text-charcoal">{totalInventory}</p>
           </div>
-          <MdInventory className="text-red-500 text-4xl" />
+          <MdInventory className="text-lavender text-3xl" />
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Total Inventory Price</h3>
-            <p className="text-2xl text-green-600 font-bold">₹{totalInventoryPrice.toFixed(2)}</p>
+            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Inventory Price</h3>
+            <p className="text-heading-sm text-mint-fg font-medium">₹{totalInventoryPrice.toFixed(2)}</p>
           </div>
-          <MdAttachMoney className="text-green-500 text-4xl" />
+          <MdAttachMoney className="text-mint-fg text-3xl" />
         </div>
-           <div className="bg-white p-6 rounded-lg shadow-lg flex items-center justify-between">
+           <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Total Expenses</h3>
-            <p className="text-2xl font-bold text-red-600">₹{totalExpenses.toFixed(2)}</p>
+            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Expenses</h3>
+            <p className="text-heading-sm font-medium text-red-600">₹{totalExpenses.toFixed(2)}</p>
           </div>
-          <MdAttachMoney className="text-red-500 text-4xl" />
+          <MdAttachMoney className="text-red-500 text-3xl" />
         </div>
       </div>
 
       {/* Total Paid and Unpaid Amounts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold">Total Paid Amount</h3>
-          <p className="text-green-600 text-2xl font-bold">₹{totalPaid.toFixed(2)}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
+        <div className="bg-canvas p-5 rounded-xl border border-ash">
+          <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Paid Amount</h3>
+          <p className="text-mint-fg text-heading-sm font-medium">₹{totalPaid.toFixed(2)}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h3 className="text-lg font-semibold">Total Unpaid Amount</h3>
-          <p className="text-red-600 text-2xl font-bold">₹{totalUnpaid.toFixed(2)}</p>
+        <div className="bg-canvas p-5 rounded-xl border border-ash">
+          <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Unpaid Amount</h3>
+          <p className="text-red-600 text-heading-sm font-medium">₹{totalUnpaid.toFixed(2)}</p>
         </div>
       </div>
 
       {/* Sales Trend and Customer Distribution */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-4">Sales Trend</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="bg-canvas p-5 rounded-xl border border-ash">
+          <h2 className="text-subheading font-medium mb-4 text-charcoal">Sales Trend</h2>
           {salesTrendData.labels ? (
             <Line data={salesTrendData} options={{ responsive: true }} />
           ) : (
-            <p>Loading...</p>
+            <p className="text-fog text-body">Loading...</p>
           )}
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl font-bold mb-4">Customer Distribution by Area</h2>
+        <div className="bg-canvas p-5 rounded-xl border border-ash">
+          <h2 className="text-subheading font-medium mb-4 text-charcoal">Customer Distribution by Area</h2>
           {customerDistributionData.labels ? (
             <Pie data={customerDistributionData} options={{ responsive: true }} />
           ) : (
-            <p>Loading...</p>
+            <p className="text-fog text-body">Loading...</p>
           )}
         </div>
       </div>
 
       {/* Display data for each month in the selected year */}
-      <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-        <h2 className="text-xl font-bold mb-4">Monthly Sales Data</h2>
+      <div className="bg-canvas p-5 rounded-xl border border-ash mb-6">
+        <h2 className="text-subheading font-medium mb-4 text-charcoal">Monthly Sales Data</h2>
         {Object.entries(monthlySalesData).length > 0 ? (
-          <table className="w-full text-sm text-left text-gray-500">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3">Month</th>
-                <th scope="col" className="px-6 py-3">Sales</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(monthlySalesData).map(([month, sales]) => (
-                <tr key={month} className="bg-white border-b">
-                  <td className="px-6 py-4">{parseInt(month)}</td>
-                  <td className="px-6 py-4">₹{(sales || 0).toFixed(2)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-body text-left">
+              <thead className="text-caption text-fog uppercase tracking-wide">
+                <tr>
+                  <th scope="col" className="px-4 py-2 border-b border-ash">Month</th>
+                  <th scope="col" className="px-4 py-2 border-b border-ash">Sales</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.entries(monthlySalesData).map(([month, sales]) => (
+                  <tr key={month} className="border-b border-ash last:border-b-0">
+                    <td className="px-4 py-3 text-charcoal">{parseInt(month)}</td>
+                    <td className="px-4 py-3 text-charcoal">₹{(sales || 0).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p>Loading monthly sales data...</p>
+          <p className="text-fog text-body">Loading monthly sales data...</p>
         )}
       </div>
 

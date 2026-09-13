@@ -35,21 +35,21 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <ToastContainer position="top-right" autoClose={3000} /> {/* Toast container for testing */}
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-semibold text-center text-blue-600 mb-6">
-          Welcome Back
+    <div className="flex items-center justify-center min-h-screen bg-paper px-4">
+      <ToastContainer position="top-right" autoClose={3000} />
+      <div className="bg-canvas p-8 rounded-2xl border border-ash shadow-subtle w-full max-w-md">
+        <h2 className="text-heading-sm font-medium text-center text-charcoal mb-2 tracking-tight">
+          Welcome back
         </h2>
-        <p className="text-center text-gray-500 mb-8">Sign in to continue</p>
-        
-        <form onSubmit={handleLogin} className="flex flex-col">
+        <p className="text-center text-fog text-body mb-8">Sign in to continue</p>
+
+        <form onSubmit={handleLogin} className="flex flex-col gap-4">
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="p-3 mb-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="p-3 rounded-md border border-ink text-body focus:outline-none focus:ring-2 focus:ring-accent"
             required
           />
           <input
@@ -57,19 +57,19 @@ const Login = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="p-3 mb-6 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="p-3 rounded-md border border-ink text-body focus:outline-none focus:ring-2 focus:ring-accent"
             required
           />
           <button
             type="submit"
-            className="bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 ease-in-out"
+            className="bg-ink text-white py-3 rounded-lg font-medium text-body-lg hover:bg-charcoal transition-colors shadow-subtle"
           >
             Sign In
           </button>
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-gray-500">
+          <p className="text-fog text-body">
             Login to continue.
           </p>
         </div>

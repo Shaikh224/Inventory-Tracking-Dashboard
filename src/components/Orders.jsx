@@ -22,7 +22,7 @@ Modal.setAppElement("#root");
 const BillTemplate1 = ({ order, id }) => (
     <div className="space-y-4" id={id}>
         <div className="text-center mb-4">
-            <h3 className="text-2xl font-bold text-blue-500">
+            <h3 className="text-2xl font-bold text-accent">
                 STA Foods & Oils .Co
             </h3>
             <p className="text-gray-600 text-lg font-medium">
@@ -282,35 +282,35 @@ function BillModal({ isOpen, onClose, order }) {
                 },
             }}
         >
-            <div className="modal-content p-4 rounded-lg shadow-md bg-white relative">
+            <div className="modal-content p-5 rounded-xl border border-ash bg-canvas relative">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-semibold text-gray-800">Order Bill</h2>
+                    <h2 className="text-subheading font-medium text-charcoal">Order Bill</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-red-600 font-bold text-xl"
+                        className="text-fog hover:text-red-600 font-bold text-xl leading-none"
                     >
                         ×
                     </button>
                 </div>
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                         Select Template
                     </label>
                     <select
                         value={selectedTemplate}
                         onChange={(e) => setSelectedTemplate(e.target.value)}
-                        className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                         <option value="template1">Template 1</option>
                         <option value="template2">Template 2</option>
                     </select>
                 </div>
                 {renderTemplate()}
-                <div className="flex justify-center mt-4">
+                <div className="flex justify-center gap-2 mt-4">
                     <button
                         onClick={() => handleShare('pdf')}
                         disabled={sharing}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md mr-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-ink hover:bg-charcoal text-white px-4 py-2 rounded-lg text-body font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {sharing ? (
                             <span className="flex items-center justify-center">
@@ -323,7 +323,7 @@ function BillModal({ isOpen, onClose, order }) {
                     <button
                         onClick={() => handleShare('whatsapp')}
                         disabled={sharing}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-canvas hover:bg-paper text-charcoal border border-ash px-4 py-2 rounded-lg text-body font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {sharing ? (
                             <span className="flex items-center justify-center">
@@ -587,41 +587,41 @@ function Orders() {
 
 
     return (
-        <div className="p-6 bg-white rounded-lg shadow-lg max-w-lg mx-auto">
+        <div className="p-6 bg-canvas rounded-xl border border-ash max-w-lg mx-auto my-8">
             <ToastContainer />
-            <h2 className="text-3xl font-semibold mb-6 text-center">Create Order</h2>
+            <h2 className="text-heading-sm font-medium mb-6 text-center text-charcoal tracking-tight">Create Order</h2>
             <form onSubmit={handleCreateOrder} className="space-y-4">
-            <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                       Order Date
                     </label>
                    <input
                        type="date"
                        value={orderDate}
                       onChange={(e) => setOrderDate(e.target.value)}
-                      className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
                      />
               </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                         Search Customer
                     </label>
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
                         placeholder="Enter name or phone number"
                     />
                 </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                         Select Customer
                     </label>
                     <select
                         value={selectedCustomer}
                         onChange={(e) => setSelectedCustomer(e.target.value)}
-                        className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                         <option value="">Select Customer</option>
                         {filteredCustomers.map((customer) => (
@@ -631,24 +631,24 @@ function Orders() {
                         ))}
                     </select>
                 </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                         Select Products
                     </label>
-                    <div className="space-y-3">
+                    <div className="border border-ash rounded-xl divide-y divide-ash">
                         {products.map((product) => (
-                            <div key={product.id} className="flex items-center justify-between p-2 border-b border-gray-200 last:border-b-0">
+                            <div key={product.id} className="flex items-center justify-between p-3">
                                 <div className="flex items-center">
                                     <input
                                         type="checkbox"
                                         value={product.id}
                                         checked={selectedProducts.includes(product.id)}
                                         onChange={handleProductSelection}
-                                        className="mr-2"
+                                        className="mr-2 accent-accent"
                                     />
-                                    <label className="flex-1">{product.name}</label>
+                                    <label className="flex-1 text-body text-charcoal">{product.name}</label>
                                 </div>
-                                <div className="text-sm text-gray-600 ml-auto flex space-x-2">
+                                <div className="text-body text-steel ml-auto flex items-center gap-2">
                                     <span>Stock: {product.quantity}</span>
                                     <span>₹{product.price}</span>
                                     <input
@@ -656,7 +656,7 @@ function Orders() {
                                         min="1"
                                         value={quantities[product.id] || ""}
                                         onChange={(e) => handleQuantityChange(product.id, e.target.value)}
-                                        className="w-16 ml-2 border border-gray-300 p-1 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                                        className="w-16 border border-ink p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-center"
                                         placeholder="Qty"
                                     />
                                 </div>
@@ -664,30 +664,30 @@ function Orders() {
                         ))}
                     </div>
                 </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                         Total Amount
                     </label>
-                    <div className="border border-gray-300 p-2 rounded-lg w-full text-right font-semibold text-green-600">
+                    <div className="border border-ash rounded-md p-2 w-full text-right font-medium text-mint-fg bg-paper">
                         ₹{totalOrderAmount}
                     </div>
                 </div>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="mb-1">
+                    <label className="block text-caption font-medium text-steel mb-1">
                         Payment Status
                     </label>
                     <select
                         value={paymentStatus}
                         onChange={(e) => setPaymentStatus(e.target.value)}
-                        className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                         <option value="Paid">Paid</option>
                          <option value="Unpaid">Unpaid</option>
                     </select>
                 </div>
                 {paymentStatus === "Unpaid" && (
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <div className="mb-1">
+                        <label className="block text-caption font-medium text-steel mb-1">
                             Amount Paid
                         </label>
                         <input
@@ -695,14 +695,14 @@ function Orders() {
                             min="0"
                             value={amountPaid}
                             onChange={(e) => setAmountPaid(parseFloat(e.target.value))}
-                            className="border border-gray-300 p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="border border-ink p-2 rounded-md w-full text-body focus:outline-none focus:ring-2 focus:ring-accent"
                             placeholder="Amount Paid"
                         />
                     </div>
                 )}
                 <button
                     type="submit"
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-ink hover:bg-charcoal text-white py-2.5 rounded-lg font-medium text-body-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     disabled={loading}
                 >
                      {loading ? (

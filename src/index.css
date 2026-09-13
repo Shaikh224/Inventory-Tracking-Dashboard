@@ -1,3 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  background-color: #f5f5f5;
+  color: #171717;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+}

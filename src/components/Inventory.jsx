@@ -84,16 +84,16 @@ function Inventory() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-lg max-w-4xl mx-auto mt-10">
-      <h2 className="text-3xl font-semibold mb-6 text-center text-blue-600">
+    <div className="p-4 sm:p-6 bg-canvas rounded-xl border border-ash max-w-4xl mx-auto mt-10">
+      <h2 className="text-heading-sm font-medium mb-6 text-center text-charcoal tracking-tight">
         Inventory Management
       </h2>
-      
+
       <form onSubmit={handleAddOrUpdateProduct} className="space-y-4 mb-6">
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3">
           <input
             type="text"
-            className="border p-2 rounded w-full md:w-1/3"
+            className="border border-ink rounded-md p-2 text-body w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder="Product Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -101,7 +101,7 @@ function Inventory() {
           />
           <input
             type="number"
-            className="border p-2 rounded w-full md:w-1/4"
+            className="border border-ink rounded-md p-2 text-body w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder="Quantity"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
@@ -109,7 +109,7 @@ function Inventory() {
           />
           <input
             type="number"
-            className="border p-2 rounded w-full md:w-1/4"
+            className="border border-ink rounded-md p-2 text-body w-full md:w-1/4 focus:outline-none focus:ring-2 focus:ring-accent"
             placeholder="Price"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
@@ -117,43 +117,43 @@ function Inventory() {
           />
           <button
             type="submit"
-            className={`p-2 rounded text-white flex items-center justify-center transition ${
-              editingProduct ? "bg-yellow-500 hover:bg-yellow-600" : "bg-blue-500 hover:bg-blue-600"
+            className={`px-4 py-2 rounded-lg font-medium text-body flex items-center justify-center gap-1 transition-colors ${
+              editingProduct ? "bg-tangerine text-white hover:opacity-90" : "bg-ink text-white hover:bg-charcoal"
             }`}
           >
-            {editingProduct ? <FaEdit className="mr-1" /> : <FaPlus className="mr-1" />}
+            {editingProduct ? <FaEdit /> : <FaPlus />}
             {editingProduct ? "Update" : "Add"}
           </button>
         </div>
       </form>
-      
-      <ul className="space-y-4">
+
+      <ul className="space-y-3">
         {products.map((product) => (
           <li
             key={product.id}
-            className="p-4 bg-gray-50 border rounded-lg shadow-md hover:shadow-lg transition"
+            className="p-4 bg-paper border border-ash rounded-xl hover:border-smoke transition-colors"
           >
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="font-semibold text-lg">{product.name}</h3>
-                <p className="text-gray-600">Quantity: {product.quantity}</p>
-                <p className="text-gray-600">Price: ₹{product.price.toFixed(2)}</p>
+                <h3 className="font-medium text-body-lg text-charcoal">{product.name}</h3>
+                <p className="text-steel text-body">Quantity: {product.quantity}</p>
+                <p className="text-steel text-body">Price: ₹{product.price.toFixed(2)}</p>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex gap-2">
                 <button
-                  className="flex items-center px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-canvas text-charcoal border border-ash rounded-lg hover:bg-paper transition-colors text-body"
                   onClick={() => handleEditProduct(product)}
                 >
-                  <FaEdit className="mr-1" /> Edit
+                  <FaEdit /> Edit
                 </button>
                 <button
-                  className="flex items-center px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                  className="flex items-center gap-1 px-3 py-1.5 bg-canvas text-red-600 border border-ash rounded-lg hover:bg-red-50 transition-colors text-body"
                   onClick={() => {
                     setProductToDelete(product.id); // Set the product ID to delete
                     setConfirmDelete(true); // Show the confirmation modal
                   }}
                 >
-                  <FaTrash className="mr-1" /> Delete
+                  <FaTrash /> Delete
                 </button>
               </div>
             </div>
@@ -163,20 +163,20 @@ function Inventory() {
 
       {/* Confirmation Modal */}
       {confirmDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
-            <p>Are you sure you want to delete this product?</p>
-            <div className="flex justify-end mt-4">
-              <button 
-                onClick={() => setConfirmDelete(false)} 
-                className="bg-gray-300 text-black p-2 rounded mr-2"
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-canvas p-6 rounded-xl border border-ash shadow-card">
+            <h2 className="text-body-lg font-semibold mb-4 text-charcoal">Confirm Delete</h2>
+            <p className="text-body text-steel">Are you sure you want to delete this product?</p>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-4 py-2 rounded-lg border border-ash text-charcoal hover:bg-paper transition-colors text-body"
               >
                 Cancel
               </button>
-              <button 
-                onClick={handleDeleteProduct} 
-                className="bg-red-500 text-white p-2 rounded"
+              <button
+                onClick={handleDeleteProduct}
+                className="px-4 py-2 rounded-lg bg-ink text-white hover:bg-charcoal transition-colors text-body"
               >
                 Confirm
               </button>
