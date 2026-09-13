@@ -3,9 +3,22 @@ import { db, collection, getDocs } from "../firebase";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Line, Pie } from "react-chartjs-2";
+import { Line, Bar } from "react-chartjs-2";
 import 'chart.js/auto';
-import { MdAttachMoney, MdGroup, MdInventory, MdShoppingCart } from "react-icons/md";
+import { MdAttachMoney, MdGroup, MdInventory, MdShoppingCart, MdReceiptLong, MdSavings } from "react-icons/md";
+
+import { formatINR, formatNumber, monthName, MONTH_NAMES } from "../lib/format";
+import {
+  lineChartOptions,
+  horizontalBarOptions,
+  barDataset,
+  chartColors,
+  crosshairPlugin,
+  lineEndLabel,
+  barValueLabels,
+} from "../lib/chartTheme";
+import { PageContainer, PageHeading, Card, SectionCard, StatTile, ChartFrame, EmptyState } from "./ui";
+import { DEMO_MODE, demoDashboard } from "../lib/demoData";
 
 function Dashboard() {
   const [totalSales, setTotalSales] = useState(0);
@@ -18,28 +31,31 @@ function Dashboard() {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(null);
-  const [salesTrendData, setSalesTrendData] = useState({});
-  const [customerDistributionData, setCustomerDistributionData] = useState({});
-  const [expensesData, setExpensesData] = useState([]);
+  const [salesTrend, setSalesTrend] = useState({ labels: [], values: [] });
+  const [areaDistribution, setAreaDistribution] = useState({ labels: [], values: [] });
   const [monthlySalesData, setMonthlySalesData] = useState({});
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-
-    const LoadingSpinner = () => (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
-            <svg
-                className="animate-spin h-10 w-10 text-white"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill="currentColor"
-                    d="M12 4V1a1 1 0 011-1h1a1 1 0 011 1v3a1 1 0 01-1 1h-1a1 1 0 01-1-1zM18.767 6.156l-1.732-1 1.732-1a1 1 0 011.414 0l1.732 1-1.732 1a1 1 0 01-1.414 0zM21.303 11h3a1 1 0 011 1v1a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a1 1 0 011-1zM18.767 17.844l-1.732 1 1.732 1a1 1 0 011.414 0l1.732-1-1.732-1a1 1 0 01-1.414 0zM12 20v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-3a1 1 0 011-1h1a1 1 0 011 1zM5.233 17.844l1.732 1-1.732 1a1 1 0 01-1.414 0l-1.732-1 1.732-1a1 1 0 011.414 0zM2.697 13h-3a1 1 0 01-1-1v-1a1 1 0 011-1h3a1 1 0 011 1v1a1 1 0 01-1 1zM5.233 6.156l1.732-1-1.732-1a1 1 0 01-1.414 0l-1.732 1 1.732 1a1 1 0 011.414 0zM12 8a4 4 0 100 8 4 4 0 000-8z"
-                />
-            </svg>
-        </div>
-    );
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+
+      if (DEMO_MODE) {
+        setTotalSales(demoDashboard.totalSales);
+        setTotalRevenue(demoDashboard.totalRevenue);
+        setTotalCustomers(demoDashboard.totalCustomers);
+        setTotalInventory(demoDashboard.totalInventory);
+        setTotalInventoryPrice(demoDashboard.totalInventoryPrice);
+        setTotalPaid(demoDashboard.totalPaid);
+        setTotalUnpaid(demoDashboard.totalUnpaid);
+        setTotalExpenses(demoDashboard.totalExpenses);
+        setSalesTrend(demoDashboard.salesTrend);
+        setAreaDistribution(demoDashboard.areaDistribution);
+        setMonthlySalesData(demoDashboard.monthlySalesData);
+        setLoading(false);
+        return;
+      }
+
       try {
         // Fetch Orders
         const ordersCollection = collection(db, "orders"); // Replace "orders" with your actual collection name
@@ -83,20 +99,6 @@ function Dashboard() {
         setTotalInventoryPrice(inventoryItems.reduce((acc, item) => acc + (item.quantity * item.price), 0));
         setTotalExpenses(filteredExpenses.reduce((acc, expense) => acc + (expense.totalAmount || 0), 0));
 
-        // Calculate sales trend (either whole year or specific month)
-        const salesTrendData = {
-          labels: [],
-          datasets: [
-            {
-              label: "Sales Trend",
-              data: [],
-              backgroundColor: "rgba(75, 192, 192, 0.2)",
-              borderColor: "rgba(75, 192, 192, 1)",
-              fill: true,
-            },
-          ],
-        };
-
         // Sort the filtered orders by date in ascending order
         filteredOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -112,28 +114,25 @@ function Dashboard() {
           monthlySales[formattedDate] = (monthlySales[formattedDate] || 0) + order.total;
         });
 
-        // Add labels and data to the chart in ascending order
-        Object.keys(monthlySales).sort().forEach((month) => {
-          salesTrendData.labels.push(month);
-          salesTrendData.datasets[0].data.push(monthlySales[month]);
+        const sortedKeys = Object.keys(monthlySales).sort();
+        setSalesTrend({
+          labels: sortedKeys.map((key) => {
+            const [year, month] = key.split("-");
+            return `${monthName(month).slice(0, 3)} ${year}`;
+          }),
+          values: sortedKeys.map((key) => monthlySales[key]),
         });
 
-        setSalesTrendData(salesTrendData);
-
-        // Calculate Customer Distribution - Assuming you have "area" field in customers data
-        const areaDistribution = {};
+        // Customer distribution by area, ranked high -> low
+        const areaCounts = {};
         customersData.forEach((customer) => {
-          areaDistribution[customer.area] = (areaDistribution[customer.area] || 0) + 1;
+          const area = customer.area || "Unspecified";
+          areaCounts[area] = (areaCounts[area] || 0) + 1;
         });
-        setCustomerDistributionData({
-          labels: Object.keys(areaDistribution),
-          datasets: [
-            {
-              label: "Customer Distribution by Area",
-              data: Object.values(areaDistribution),
-              backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
-            },
-          ],
+        const rankedAreas = Object.entries(areaCounts).sort((a, b) => b[1] - a[1]);
+        setAreaDistribution({
+          labels: rankedAreas.map(([area]) => area),
+          values: rankedAreas.map(([, count]) => count),
         });
 
         // Store monthly sales data
@@ -144,11 +143,7 @@ function Dashboard() {
           const month = orderDate.getMonth() + 1;
 
           if (selectedYear === orderDate.getFullYear()) {
-            if (selectedMonth !== null && month === selectedMonth) {
-              monthlySalesData[month] = (monthlySalesData[month] || 0) + order.total;
-            } else {
-              monthlySalesData[month] = (monthlySalesData[month] || 0) + order.total;
-            }
+            monthlySalesData[month] = (monthlySalesData[month] || 0) + order.total;
           }
         });
         setMonthlySalesData(monthlySalesData);
@@ -162,161 +157,149 @@ function Dashboard() {
     fetchData();
   }, [selectedYear, selectedMonth]); // Dependencies for month filter
 
+  const netPosition = totalRevenue - totalExpenses;
+  const monthlyRows = Object.entries(monthlySalesData).sort((a, b) => a[0] - b[0]);
+
+  const selectClass =
+    "rounded-md border border-ink bg-canvas py-1.5 px-2.5 text-body text-charcoal focus:outline-none focus:ring-2 focus:ring-accent";
+
   return (
-       <div className="p-4 sm:p-6 bg-paper min-h-screen">
-            {loading && <LoadingSpinner />}
-            <h1 className="text-heading-sm sm:text-heading font-medium mb-6 text-charcoal tracking-tight">Dashboard</h1>
-      {/* Year and Month Filters */}
-      <div className="flex gap-4 mb-6">
-        <div>
-          <label htmlFor="year" className="block text-caption font-medium text-steel mb-1">
-            Year
-          </label>
-          <select
-            id="year"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            {/* Generate year options from 2020 to the current year */}
-            {Array.from({ length: 10 }, (_, i) => i + 2020).map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="month" className="block text-caption font-medium text-steel mb-1">
-            Month
-          </label>
-          <select
-            id="month"
-            value={selectedMonth}
-            onChange={(e) => {
-              const month = parseInt(e.target.value);
-              if (!isNaN(month)) {
-                setSelectedMonth(month);
-              } else {
-                setSelectedMonth(null);
-              }
-            }}
-            className="rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          >
-            <option value={null}>All Months</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
-              <option key={month} value={month}>
-                {month}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+    <div className="bg-paper min-h-screen">
+      <PageContainer>
+        <PageHeading
+          title="Dashboard"
+          subtitle={
+            selectedMonth
+              ? `${monthName(selectedMonth)} ${selectedYear}`
+              : `Full year ${selectedYear}`
+          }
+        />
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
-          <div>
-            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Sales</h3>
-            <p className="text-heading-sm font-medium text-charcoal">{totalSales}</p>
+        {/* One filter row, scoping everything below it */}
+        <Card className="p-3 mb-6 flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="year" className="text-body text-steel">Year</label>
+            <select
+              id="year"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className={selectClass}
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 2020).map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
           </div>
-          <MdShoppingCart className="text-accent text-3xl" />
-        </div>
-        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
-          <div>
-            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Revenue</h3>
-            <p className="text-heading-sm text-mint-fg font-medium">₹{totalRevenue.toFixed(2)}</p>
+          <div className="flex items-center gap-2">
+            <label htmlFor="month" className="text-body text-steel">Month</label>
+            <select
+              id="month"
+              value={selectedMonth ?? ""}
+              onChange={(e) => {
+                const month = parseInt(e.target.value);
+                setSelectedMonth(isNaN(month) ? null : month);
+              }}
+              className={selectClass}
+            >
+              <option value="">All months</option>
+              {MONTH_NAMES.map((name, i) => (
+                <option key={name} value={i + 1}>{name}</option>
+              ))}
+            </select>
           </div>
-          <MdAttachMoney className="text-mint-fg text-3xl" />
-        </div>
-        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
-          <div>
-            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Customers</h3>
-            <p className="text-heading-sm font-medium text-charcoal">{totalCustomers}</p>
-          </div>
-          <MdGroup className="text-tangerine text-3xl" />
-        </div>
-        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
-          <div>
-            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Inventory</h3>
-            <p className="text-heading-sm font-medium text-charcoal">{totalInventory}</p>
-          </div>
-          <MdInventory className="text-lavender text-3xl" />
-        </div>
-        <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
-          <div>
-            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Inventory Price</h3>
-            <p className="text-heading-sm text-mint-fg font-medium">₹{totalInventoryPrice.toFixed(2)}</p>
-          </div>
-          <MdAttachMoney className="text-mint-fg text-3xl" />
-        </div>
-           <div className="bg-canvas p-5 rounded-xl border border-ash flex items-center justify-between">
-          <div>
-            <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Expenses</h3>
-            <p className="text-heading-sm font-medium text-red-600">₹{totalExpenses.toFixed(2)}</p>
-          </div>
-          <MdAttachMoney className="text-red-500 text-3xl" />
-        </div>
-      </div>
+        </Card>
 
-      {/* Total Paid and Unpaid Amounts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-6">
-        <div className="bg-canvas p-5 rounded-xl border border-ash">
-          <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Paid Amount</h3>
-          <p className="text-mint-fg text-heading-sm font-medium">₹{totalPaid.toFixed(2)}</p>
+        {/* KPI row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+          <StatTile label="Revenue" value={formatINR(totalRevenue)} icon={MdAttachMoney} loading={loading} />
+          <StatTile label="Expenses" value={formatINR(totalExpenses)} icon={MdReceiptLong} loading={loading} />
+          <StatTile label="Net position" value={formatINR(netPosition)} icon={MdSavings} loading={loading} />
+          <StatTile label="Orders" value={formatNumber(totalSales)} icon={MdShoppingCart} loading={loading} />
+          <StatTile label="Customers" value={formatNumber(totalCustomers)} icon={MdGroup} loading={loading} />
+          <StatTile label="Units in stock" value={formatNumber(totalInventory)} icon={MdInventory} loading={loading} />
         </div>
-        <div className="bg-canvas p-5 rounded-xl border border-ash">
-          <h3 className="text-caption font-medium text-fog uppercase tracking-wide">Total Unpaid Amount</h3>
-          <p className="text-red-600 text-heading-sm font-medium">₹{totalUnpaid.toFixed(2)}</p>
-        </div>
-      </div>
 
-      {/* Sales Trend and Customer Distribution */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-canvas p-5 rounded-xl border border-ash">
-          <h2 className="text-subheading font-medium mb-4 text-charcoal">Sales Trend</h2>
-          {salesTrendData.labels ? (
-            <Line data={salesTrendData} options={{ responsive: true }} />
+        {/* Payment position */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <StatTile label="Collected" value={formatINR(totalPaid)} loading={loading} />
+          <StatTile label="Outstanding" value={formatINR(totalUnpaid)} loading={loading} />
+          <StatTile label="Stock value" value={formatINR(totalInventoryPrice)} loading={loading} />
+        </div>
+
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <SectionCard title="Revenue trend">
+            <ChartFrame
+              loading={loading}
+              hasData={salesTrend.values.length > 1}
+              emptyTitle="Not enough data to plot a trend"
+              emptyHint="At least two months of orders are needed."
+            >
+              <Line
+                data={{
+                  labels: salesTrend.labels,
+                  datasets: [{
+                    label: "Revenue",
+                    data: salesTrend.values,
+                    fill: true,
+                    backgroundColor: chartColors.seriesWash,
+                  }],
+                }}
+                options={lineChartOptions}
+                plugins={[crosshairPlugin, lineEndLabel]}
+              />
+            </ChartFrame>
+          </SectionCard>
+
+          <SectionCard title="Customers by area">
+            <ChartFrame
+              loading={loading}
+              hasData={areaDistribution.values.length > 0}
+              emptyTitle="No customers yet"
+              emptyHint="Areas appear here once customers are added."
+            >
+              <Bar
+                data={{
+                  labels: areaDistribution.labels,
+                  datasets: [barDataset(areaDistribution.values)],
+                }}
+                options={horizontalBarOptions}
+                plugins={[barValueLabels]}
+              />
+            </ChartFrame>
+          </SectionCard>
+        </div>
+
+        {/* Table view — the WCAG-clean twin of the revenue trend */}
+        <SectionCard title="Monthly revenue" bodyClassName="">
+          {loading ? (
+            <div className="p-4 space-y-2">
+              {[0, 1, 2].map((i) => <div key={i} className="h-8 bg-ash rounded animate-pulse" />)}
+            </div>
+          ) : monthlyRows.length === 0 ? (
+            <EmptyState title="No revenue recorded" hint="Orders in this period will appear here." />
           ) : (
-            <p className="text-fog text-body">Loading...</p>
-          )}
-        </div>
-        <div className="bg-canvas p-5 rounded-xl border border-ash">
-          <h2 className="text-subheading font-medium mb-4 text-charcoal">Customer Distribution by Area</h2>
-          {customerDistributionData.labels ? (
-            <Pie data={customerDistributionData} options={{ responsive: true }} />
-          ) : (
-            <p className="text-fog text-body">Loading...</p>
-          )}
-        </div>
-      </div>
-
-      {/* Display data for each month in the selected year */}
-      <div className="bg-canvas p-5 rounded-xl border border-ash mb-6">
-        <h2 className="text-subheading font-medium mb-4 text-charcoal">Monthly Sales Data</h2>
-        {Object.entries(monthlySalesData).length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-body text-left">
-              <thead className="text-caption text-fog uppercase tracking-wide">
-                <tr>
-                  <th scope="col" className="px-4 py-2 border-b border-ash">Month</th>
-                  <th scope="col" className="px-4 py-2 border-b border-ash">Sales</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(monthlySalesData).map(([month, sales]) => (
-                  <tr key={month} className="border-b border-ash last:border-b-0">
-                    <td className="px-4 py-3 text-charcoal">{parseInt(month)}</td>
-                    <td className="px-4 py-3 text-charcoal">₹{(sales || 0).toFixed(2)}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-body text-left">
+                <thead className="text-caption text-fog uppercase tracking-wide">
+                  <tr>
+                    <th scope="col" className="px-4 py-2 border-b border-ash font-medium">Month</th>
+                    <th scope="col" className="px-4 py-2 border-b border-ash font-medium text-right">Revenue</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-fog text-body">Loading monthly sales data...</p>
-        )}
-      </div>
+                </thead>
+                <tbody>
+                  {monthlyRows.map(([month, sales]) => (
+                    <tr key={month} className="border-b border-ash last:border-b-0 hover:bg-paper transition-colors">
+                      <td className="px-4 py-3 text-charcoal">{monthName(month)}</td>
+                      <td className="px-4 py-3 text-charcoal text-right tabular-nums">{formatINR(sales)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </SectionCard>
+      </PageContainer>
 
       <ToastContainer />
     </div>

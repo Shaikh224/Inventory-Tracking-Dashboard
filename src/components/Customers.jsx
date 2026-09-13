@@ -25,6 +25,9 @@ import "react-toastify/dist/ReactToastify.css";
 import Modal from "react-modal";
 import html2pdf from 'html2pdf.js';
 import { useNavigate } from "react-router-dom";
+import { formatNumber } from "../lib/format";
+import { PageContainer, PageHeading, SectionCard, StatTile, EmptyState, Skeleton } from "./ui";
+import { DEMO_MODE, demoCustomers, demoOrders } from "../lib/demoData";
 
 Modal.setAppElement("#root");
 
@@ -47,21 +50,12 @@ function Customers() {
     const navigate = useNavigate();
     const [orderStatuses, setOrderStatuses] = useState([]);
 
-    const LoadingSpinner = () => (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
-            <svg
-                className="animate-spin h-10 w-10 text-white"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill="currentColor"
-                    d="M12 4V1a1 1 0 011-1h1a1 1 0 011 1v3a1 1 0 01-1 1h-1a1 1 0 01-1-1zM18.767 6.156l-1.732-1 1.732-1a1 1 0 011.414 0l1.732 1-1.732 1a1 1 0 01-1.414 0zM21.303 11h3a1 1 0 011 1v1a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a1 1 0 011-1zM18.767 17.844l-1.732 1 1.732 1a1 1 0 011.414 0l1.732-1-1.732-1a1 1 0 01-1.414 0zM12 20v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-3a1 1 0 011-1h1a1 1 0 011 1zM5.233 17.844l1.732 1-1.732 1a1 1 0 01-1.414 0l-1.732-1 1.732-1a1 1 0 011.414 0zM2.697 13h-3a1 1 0 01-1-1v-1a1 1 0 011-1h3a1 1 0 011 1v1a1 1 0 01-1 1zM5.233 6.156l1.732-1-1.732-1a1 1 0 01-1.414 0l-1.732 1 1.732 1a1 1 0 011.414 0zM12 8a4 4 0 100 8 4 4 0 000-8z"
-                />
-            </svg>
-        </div>
-    );
     useEffect(() => {
         const fetchCustomers = async () => {
+            if (DEMO_MODE) {
+                setCustomers([...demoCustomers].sort((a, b) => a.name.localeCompare(b.name)));
+                return;
+            }
             try {
                 const customersCollection = collection(db, "customers");
                 const customersSnapshot = await getDocs(customersCollection);
@@ -82,6 +76,11 @@ function Customers() {
     }, []);
 
     const fetchOrders = async () => {
+        if (DEMO_MODE) {
+            setOrders(demoOrders);
+            setLoading(false);
+            return;
+        }
         try {
             const ordersCollection = collection(db, "orders");
             const ordersSnapshot = await getDocs(ordersCollection);
@@ -413,31 +412,49 @@ function Customers() {
             customer.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
             customer.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    const businessCount = customers.filter((c) => c.customerType === "business").length;
+
     return (
-        <div className="p-3 sm:p-4 md:p-6 bg-canvas rounded-xl border border-ash">
-            {loading && <LoadingSpinner />}
+        <div className="bg-paper min-h-screen">
+          <PageContainer>
             <ToastContainer />
-            <h2 className="text-heading-sm sm:text-heading font-medium mb-4 sm:mb-6 text-charcoal tracking-tight">
-                Customers
-            </h2>
-            <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row items-center gap-2">
+            <PageHeading
+                title="Customers"
+                subtitle={`${customers.length} total · ${businessCount} business`}
+                actions={
+                    <>
+                        <button
+                            onClick={downloadCustomerData}
+                            className="flex items-center gap-2 px-3 py-2 bg-canvas text-charcoal border border-ash rounded-lg hover:bg-paper transition-colors text-body font-medium"
+                        >
+                            <FaDownload /> Export
+                        </button>
+                        <button
+                            onClick={handleOpenModal}
+                            className="bg-ink text-white px-4 py-2 rounded-lg hover:bg-charcoal transition-colors flex items-center justify-center gap-2 text-body font-medium"
+                        >
+                            <FaUserPlus /> Add customer
+                        </button>
+                    </>
+                }
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                <StatTile label="Customers" value={formatNumber(customers.length)} loading={loading} />
+                <StatTile label="Business accounts" value={formatNumber(businessCount)} loading={loading} />
+                <StatTile label="Orders placed" value={formatNumber(orders.length)} loading={loading} />
+            </div>
+
+            <div className="mb-4 flex items-center gap-2 bg-canvas border border-ash rounded-xl p-3">
+                <FaSearch className="text-silver ml-1" />
                 <input
                     type="text"
                     placeholder="Search by name or area..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border border-ink rounded-md p-2 w-full sm:flex-grow text-body focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="border-0 bg-transparent p-1 w-full text-body text-charcoal placeholder:text-fog focus:outline-none"
                 />
-                <button className="p-2.5 bg-ink text-white rounded-lg hover:bg-charcoal text-body transition-colors">
-                    <FaSearch />
-                </button>
             </div>
-            <button
-                onClick={handleOpenModal}
-                 className="mb-4 w-full sm:w-auto bg-ink text-white px-4 py-2 rounded-lg hover:bg-charcoal transition-colors flex items-center justify-center gap-2 text-body font-medium"
-            >
-                <FaUserPlus /> Add Customer
-            </button>
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={handleCloseModal}
@@ -541,34 +558,37 @@ function Customers() {
                     </div>
                 </form>
             </Modal>
-            <h3 className="text-body-lg font-medium mb-3 sm:mb-4 text-charcoal">
-                Total Customers: {customers.length}
-            </h3>
-            <button
-                onClick={downloadCustomerData}
-                 className="mb-4 flex items-center gap-2 px-3 py-2 bg-canvas text-charcoal border border-ash rounded-lg hover:bg-paper transition-colors text-body"
-            >
-                <FaDownload /> Download Customer Data
-            </button>
+            {loading ? (
+              <div className="border border-ash rounded-xl bg-canvas p-4 space-y-2">
+                {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+              </div>
+            ) : filteredCustomers.length === 0 ? (
+              <div className="border border-ash rounded-xl bg-canvas">
+                <EmptyState
+                  title={customers.length === 0 ? "No customers yet" : "No customers match that search"}
+                  hint={customers.length === 0 ? "Add your first customer to get started." : "Try a different name or area."}
+                />
+              </div>
+            ) : (
             <div className="overflow-x-auto border border-ash rounded-xl">
                 <table className="min-w-full bg-canvas text-body">
                     <thead>
                         <tr className="text-caption text-fog uppercase tracking-wide">
-                             <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">#</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Name</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Phone</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Address</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Area</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Type</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Orders</th>
-                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left">Actions</th>
+                             <th className="border-b border-ash px-2 sm:px-3 py-2 text-left font-medium">#</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left font-medium">Name</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left font-medium">Phone</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left font-medium">Address</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left font-medium">Area</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-left font-medium">Type</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-right font-medium">Orders</th>
+                            <th className="border-b border-ash px-2 sm:px-3 py-2 text-right font-medium">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredCustomers.map((customer, index) => (
                             <tr key={customer.id} className="hover:bg-paper transition-colors">
-                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal">{index+1}</td>
-                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal">{customer.name}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-fog tabular-nums">{index+1}</td>
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal font-medium">{customer.name}</td>
                                 <td className="border-b border-ash px-2 sm:px-3 py-2 text-steel">{customer.phoneNumber}</td>
                                 <td className="border-b border-ash px-2 sm:px-3 py-2 text-steel">{customer.address}</td>
                                 <td className="border-b border-ash px-2 sm:px-3 py-2 text-steel">{customer.area}</td>
@@ -580,31 +600,34 @@ function Customers() {
                                     > {customer.customerType === 'business' ? 'Business' : 'Individual'}
                                     </span>
                                 </td>
-                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal">
+                                <td className="border-b border-ash px-2 sm:px-3 py-2 text-charcoal text-right tabular-nums">
                                     {
                                         orders.filter((order) => order.customer === customer.id)
                                             .length
                                     }
                                 </td>
                                 <td className="border-b border-ash px-2 sm:px-3 py-2">
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 justify-end">
                                     <button
                                         onClick={() => handleViewOrders(customer.id)}
-                                        className="text-accent hover:opacity-70"
+                                        className="p-1.5 rounded-md bg-canvas text-charcoal border border-ash hover:bg-paper transition-colors"
+                                        aria-label={`View ${customer.name}`}
                                     >
-                                        <FaEye size={14} />
+                                        <FaEye size={12} />
                                     </button>
                                     <button
                                         onClick={() => handleEditCustomer(customer)}
-                                        className="text-tangerine hover:opacity-70"
+                                        className="p-1.5 rounded-md bg-canvas text-charcoal border border-ash hover:bg-paper transition-colors"
+                                        aria-label={`Edit ${customer.name}`}
                                     >
-                                        <FaEdit size={14} />
+                                        <FaEdit size={12} />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteConfirm(customer)}
-                                        className="text-red-500 hover:opacity-70"
+                                        className="p-1.5 rounded-md bg-canvas text-red-600 border border-ash hover:bg-red-50 transition-colors"
+                                        aria-label={`Delete ${customer.name}`}
                                     >
-                                        <FaTrash size={14} />
+                                        <FaTrash size={12} />
                                     </button>
                                     </div>
                                 </td>
@@ -613,6 +636,8 @@ function Customers() {
                     </tbody>
                 </table>
             </div>
+            )}
+          </PageContainer>
 
             {/* Delete Confirmation Modal for Customer */}
             <Modal

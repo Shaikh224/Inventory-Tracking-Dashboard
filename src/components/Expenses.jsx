@@ -5,6 +5,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; 
 import * as XLSX from 'xlsx';
 import Modal from 'react-modal'; // Import Modal component
+import { formatINR, formatNumber, MONTH_NAMES } from "../lib/format";
+import { PageContainer, PageHeading, SectionCard, StatTile, EmptyState } from "./ui";
+import { DEMO_MODE, demoExpenses } from "../lib/demoData";
 
 Modal.setAppElement('#root'); // Set app element for Modal
 
@@ -24,6 +27,10 @@ const Expenses = () => {
 
   useEffect(() => {
     const fetchExpenses = async () => {
+      if (DEMO_MODE) {
+        setItems(demoExpenses);
+        return;
+      }
       const expensesCollection = collection(db, "expenses");
       const expensesSnapshot = await getDocs(expensesCollection);
       const expensesData = expensesSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
@@ -170,9 +177,20 @@ const Expenses = () => {
     return filtered;
   };
 
+  const totalSpend = filteredExpenses.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
+  const totalSettled = filteredExpenses.reduce((sum, i) => sum + (Number(i.paidAmount) || 0), 0);
+  const totalOwed = filteredExpenses.reduce((sum, i) => sum + (Number(i.unpaidAmount) || 0), 0);
+
   return (
-    <div className="p-4 sm:p-6 bg-paper min-h-screen">
-      <h1 className="text-heading-sm sm:text-heading font-medium mb-6 text-charcoal tracking-tight">Expenses</h1>
+    <div className="bg-paper min-h-screen">
+     <PageContainer>
+      <PageHeading title="Expenses" subtitle={`${filteredExpenses.length} entries in view`} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <StatTile label="Total spend" value={formatINR(totalSpend)} />
+        <StatTile label="Settled" value={formatINR(totalSettled)} />
+        <StatTile label="Owed to suppliers" value={formatINR(totalOwed)} />
+      </div>
 
       {/* Filter by month and year */}
       <div className="mb-4 flex flex-wrap items-center gap-4 bg-canvas border border-ash rounded-xl p-4">
@@ -190,18 +208,9 @@ const Expenses = () => {
             className="rounded-md border border-ink bg-canvas py-1.5 px-2 text-body focus:outline-none focus:ring-2 focus:ring-accent"
           >
             <option value={null}>All</option>
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
+            {MONTH_NAMES.map((name, i) => (
+              <option key={name} value={i + 1}>{name}</option>
+            ))}
           </select>
         </div>
 
@@ -249,111 +258,101 @@ const Expenses = () => {
         </div>
       </div>
 
-      <div className="bg-canvas p-5 rounded-xl border border-ash mb-6">
-        <h2 className="text-subheading font-medium mb-4 text-charcoal">Add Expense</h2>
-        <div className="mb-4">
-          <label
-            htmlFor="itemName"
-            className="block text-caption font-medium text-steel mb-1"
+      <div className="mb-6">
+        <SectionCard title="Add expense">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="lg:col-span-2">
+              <label htmlFor="itemName" className="block text-caption font-medium text-steel mb-1">
+                Item name
+              </label>
+              <input
+                type="text"
+                id="itemName"
+                placeholder="e.g. Mustard seed (raw)"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="supplier" className="block text-caption font-medium text-steel mb-1">
+                Supplier
+              </label>
+              <input
+                type="text"
+                id="supplier"
+                placeholder="Supplier"
+                value={supplier}
+                onChange={(e) => setSupplier(e.target.value)}
+                className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="quantity" className="block text-caption font-medium text-steel mb-1">
+                Quantity
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                placeholder="0"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="totalAmount" className="block text-caption font-medium text-steel mb-1">
+                Total amount (₹)
+              </label>
+              <input
+                type="number"
+                id="totalAmount"
+                placeholder="0"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(e.target.value)}
+                className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+            <div>
+              <label htmlFor="paidAmount" className="block text-caption font-medium text-steel mb-1">
+                Paid amount (₹)
+              </label>
+              <input
+                type="number"
+                id="paidAmount"
+                placeholder="0"
+                value={paidAmount}
+                onChange={(e) => setPaidAmount(e.target.value)}
+                className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+          </div>
+          <button
+            onClick={handleAddExpense}
+            className="mt-4 bg-ink text-white px-4 py-2 rounded-lg font-medium hover:bg-charcoal transition-colors"
           >
-            Item Name:
-          </label>
-          <input
-            type="text"
-            id="itemName"
-            placeholder="Item Name"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="quantity"
-            className="block text-caption font-medium text-steel mb-1"
-          >
-            Quantity:
-          </label>
-          <input
-            type="number"
-            id="quantity"
-            placeholder="Quantity"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="totalAmount"
-            className="block text-caption font-medium text-steel mb-1"
-          >
-            Total Amount:
-          </label>
-          <input
-            type="number"
-            id="totalAmount"
-            placeholder="Total Amount"
-            value={totalAmount}
-            onChange={(e) => setTotalAmount(e.target.value)}
-            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="paidAmount"
-            className="block text-caption font-medium text-steel mb-1"
-          >
-            Paid Amount:
-          </label>
-          <input
-            type="number"
-            id="paidAmount"
-            placeholder="Paid Amount"
-            value={paidAmount}
-            onChange={(e) => setPaidAmount(e.target.value)}
-            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor="supplier"
-            className="block text-caption font-medium text-steel mb-1"
-          >
-            Supplier:
-          </label>
-          <input
-            type="text"
-            id="supplier"
-            placeholder="Supplier"
-            value={supplier}
-            onChange={(e) => setSupplier(e.target.value)}
-            className="block w-full rounded-md border border-ink bg-canvas py-2 px-3 text-body focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-        </div>
-        <button
-          onClick={handleAddExpense}
-          className="bg-ink text-white px-4 py-2 rounded-lg font-medium hover:bg-charcoal transition-colors"
-        >
-          Add Expense
-        </button>
+            Add expense
+          </button>
+        </SectionCard>
       </div>
 
-      <div className="bg-canvas p-5 rounded-xl border border-ash">
-        <h2 className="text-subheading font-medium mb-4 text-charcoal">Expense List</h2>
-        <div className="overflow-x-auto border border-ash rounded-xl">
+      <SectionCard title="Expense list" bodyClassName="">
+        {filteredExpenses.length === 0 ? (
+          <EmptyState title="No expenses in this period" hint="Add an expense above, or widen the month/year filter." />
+        ) : (
+        <div className="overflow-x-auto">
           <table className="min-w-full table-auto text-body">
             <thead>
               <tr className="text-caption text-fog uppercase tracking-wide">
-                <th className="border-b border-ash p-2 text-left">Item Name</th>
-                <th className="border-b border-ash p-2 text-left">Quantity</th>
-                <th className="border-b border-ash p-2 text-left">Total Amount</th>
-                <th className="border-b border-ash p-2 text-left">Paid Amount</th>
-                <th className="border-b border-ash p-2 text-left">Unpaid Amount</th>
-                <th className="border-b border-ash p-2 text-left">Status</th>
-                <th className="border-b border-ash p-2 text-left">Supplier</th>
-                <th className="border-b border-ash p-2 text-left">Date</th>
-                <th className="border-b border-ash p-2 text-left">Actions</th>
+                <th className="border-b border-ash px-3 py-2 text-left font-medium">Item</th>
+                <th className="border-b border-ash px-3 py-2 text-right font-medium">Qty</th>
+                <th className="border-b border-ash px-3 py-2 text-right font-medium">Total</th>
+                <th className="border-b border-ash px-3 py-2 text-right font-medium">Paid</th>
+                <th className="border-b border-ash px-3 py-2 text-right font-medium">Unpaid</th>
+                <th className="border-b border-ash px-3 py-2 text-left font-medium">Status</th>
+                <th className="border-b border-ash px-3 py-2 text-left font-medium">Supplier</th>
+                <th className="border-b border-ash px-3 py-2 text-left font-medium">Date</th>
+                <th className="border-b border-ash px-3 py-2 text-left font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -362,12 +361,12 @@ const Expenses = () => {
                   item // Render filteredExpenses
                 ) => (
                   <tr key={item.id} className="hover:bg-paper transition-colors">
-                    <td className="border-b border-ash p-2 text-charcoal">{item.itemName}</td>
-                    <td className="border-b border-ash p-2 text-charcoal">{item.quantity}</td>
-                    <td className="border-b border-ash p-2 text-charcoal">
-                      ₹{(item.totalAmount || 0).toFixed(2)}
+                    <td className="border-b border-ash px-3 py-2 text-charcoal font-medium">{item.itemName}</td>
+                    <td className="border-b border-ash px-3 py-2 text-charcoal text-right tabular-nums">{formatNumber(item.quantity)}</td>
+                    <td className="border-b border-ash px-3 py-2 text-charcoal text-right tabular-nums">
+                      {formatINR(item.totalAmount)}
                     </td>
-                    <td className="border-b border-ash p-2">
+                    <td className="border-b border-ash px-3 py-2 text-right">
                       <input
                         type="number"
                         value={item.paidAmount}
@@ -377,11 +376,11 @@ const Expenses = () => {
                             parseFloat(e.target.value)
                           )
                         }
-                        className="border border-ink p-1 rounded-md w-24 focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="border border-ink p-1 rounded-md w-24 text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-accent"
                       />
                     </td>
-                    <td className="border-b border-ash p-2 text-charcoal">
-                      ₹{(item.unpaidAmount || 0).toFixed(2)}
+                    <td className="border-b border-ash px-3 py-2 text-charcoal text-right tabular-nums">
+                      {formatINR(item.unpaidAmount)}
                     </td>
                     <td className="border-b border-ash p-2">
                       {item.status === "Paid" ? (
@@ -412,13 +411,15 @@ const Expenses = () => {
             </tbody>
           </table>
         </div>
-      </div>
+        )}
+      </SectionCard>
       <button
         onClick={downloadExcel}
         className="mt-4 bg-canvas text-charcoal border border-ash px-4 py-2 rounded-lg font-medium hover:bg-paper transition-colors"
       >
         Download Excel
       </button>
+     </PageContainer>
       <ToastContainer />
 
       {/* Delete Confirmation Modal */}

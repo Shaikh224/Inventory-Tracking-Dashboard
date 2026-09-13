@@ -33,6 +33,9 @@ import "jspdf-autotable";
 import Modal from "react-modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { formatINR } from "../lib/format";
+import { PageContainer, PageHeading, StatTile, Card } from "./ui";
+import { DEMO_MODE, demoCustomers, demoOrders } from "../lib/demoData";
 
 Modal.setAppElement("#root");
 
@@ -88,6 +91,11 @@ function CustomerDetails() {
 
   const fetchCustomer = async () => {
     setLoading(true);
+    if (DEMO_MODE) {
+      setCustomer(demoCustomers.find((c) => c.id === customerId) ?? null);
+      setLoading(false);
+      return;
+    }
     try {
       const customerDocRef = doc(db, "customers", customerId);
       const customerSnapshot = await getDoc(customerDocRef);
@@ -106,6 +114,29 @@ function CustomerDetails() {
 
     const fetchOrders = async () => {
         setLoading(true);
+        if (DEMO_MODE) {
+            const mine = demoOrders
+                .filter((o) => o.customer === customerId)
+                .map((o) => ({ ...o, type: "order" }));
+            setTotalOrderAmount(mine.reduce((s, o) => s + o.total, 0));
+            setTotalPaid(mine.reduce((s, o) => s + (o.amountPaid || 0), 0));
+            setTotalUnpaid(mine.reduce((s, o) => s + (o.amountUnpaid || 0), 0));
+            const payments = mine.flatMap((o) =>
+                (o.paymentRecords || []).map((r) => ({
+                    type: "payment",
+                    paymentDate: r.paymentDate.toDate(),
+                    totalPaid: r.amountPaid,
+                }))
+            );
+            const entries = [...mine, ...payments].sort((a, b) => {
+                const da = a.type === "order" ? new Date(a.date) : a.paymentDate;
+                const dbb = b.type === "order" ? new Date(b.date) : b.paymentDate;
+                return dbb - da;
+            });
+            setLedgerEntries(typeFilter === "all" ? entries : entries.filter((e) => e.type === typeFilter));
+            setLoading(false);
+            return;
+        }
         try {
             const ordersCollection = collection(db, "orders");
             const ordersSnapshot = await getDocs(ordersCollection);
@@ -853,7 +884,8 @@ function CustomerDetails() {
       }
     };
   return (
-    <div className="container mx-auto p-3 mt-4 sm:mt-8">
+    <div className="bg-paper min-h-screen">
+     <PageContainer>
       <style>{loaderStyle}</style>
       <ToastContainer />
       {loading ? (
@@ -862,11 +894,12 @@ function CustomerDetails() {
         </div>
       ) : (
         <>
-          <h2 className="text-heading-sm font-medium mb-4 text-center text-charcoal tracking-tight sm:text-heading">
-            Customer Details
-          </h2>
+          <PageHeading
+            title={customer?.name || "Customer"}
+            subtitle={customer ? `${customer.phoneNumber} · ${customer.address}` : undefined}
+          />
 
-          <div className="flex flex-col sm:flex-row justify-between mb-3 sm:mb-4 gap-2">
+          <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
             <div className="flex items-center gap-2">
               <select
                 className="border border-ink p-1.5 rounded-md bg-canvas hover:bg-paper text-body focus:outline-none focus:ring-2 focus:ring-accent"
@@ -951,39 +984,10 @@ function CustomerDetails() {
           </div>
 
           {customer && (
-            <div className="bg-canvas border border-ash rounded-xl p-3 mb-3 sm:p-4 sm:mb-4">
-              <h3 className="text-body-lg font-medium mb-2 text-charcoal">
-                Customer Information
-              </h3>
-              <div className="space-y-1">
-                <p className="text-body text-steel">
-                  <strong className="text-charcoal">Name:</strong> {customer.name}
-                </p>
-                <p className="text-body text-steel">
-                  <strong className="text-charcoal">Phone Number:</strong> {customer.phoneNumber}
-                </p>
-                <p className="text-body text-steel">
-                  <strong className="text-charcoal">Address:</strong> {customer.address}
-                </p>
-                <p className="text-body text-steel">
-                  <strong className="text-charcoal">
-                    Total Order Amount:{" "}
-                    <span className="text-accent">₹{totalOrderAmount}</span>
-                  </strong>
-                </p>
-                <p className="text-body text-steel">
-                  <strong className="text-charcoal">
-                    Total Paid:{" "}
-                    <span className="text-mint-fg">₹{totalPaid}</span>
-                  </strong>
-                </p>
-                <p className="text-body text-steel">
-                  <strong className="text-charcoal">
-                    Total Unpaid:{" "}
-                    <span className="text-red-600">₹{totalUnpaid}</span>
-                  </strong>
-                </p>
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <StatTile label="Billed" value={formatINR(totalOrderAmount)} />
+              <StatTile label="Paid" value={formatINR(totalPaid)} />
+              <StatTile label="Outstanding" value={formatINR(totalUnpaid)} />
             </div>
           )}
 
@@ -997,13 +1001,13 @@ function CustomerDetails() {
                   <th className="px-2 py-2 text-left">
                     Product Details
                   </th>
-                  <th className="px-2 py-2 text-left">
+                  <th className="px-2 py-2 text-right">
                     Amount
                   </th>
-                  <th className="px-2 py-2 text-left">
+                  <th className="px-2 py-2 text-right">
                     Paid
                   </th>
-                  <th className="px-2 py-2 text-left">
+                  <th className="px-2 py-2 text-right">
                     Unpaid
                   </th>
                   <th className="px-2 py-2 text-left">
@@ -1039,8 +1043,7 @@ function CustomerDetails() {
                                 key={itemIndex}
                                 className="my-0.5 text-body text-charcoal"
                               >
-                                {item.productName}-Qty:{item.quantity}-
-                                price:₹{item.price}
+                                {item.productName} · {item.quantity} × {formatINR(item.price)}
                               </div>
                             ))}
                         </div>
@@ -1050,16 +1053,16 @@ function CustomerDetails() {
                         </span>
                       )}
                     </td>
-                    <td className="border-t border-ash px-2 py-2 text-body text-charcoal">
-                      {entry.type === "order" ? `₹${entry.total}` : ""}
+                    <td className="border-t border-ash px-2 py-2 text-body text-charcoal text-right tabular-nums">
+                      {entry.type === "order" ? formatINR(entry.total) : ""}
                     </td>
-                    <td className="border-t border-ash px-2 py-2 text-body text-charcoal">
+                    <td className="border-t border-ash px-2 py-2 text-body text-charcoal text-right tabular-nums">
                       {entry.type === "order"
-                        ? `₹${entry.amountPaid}`
-                        : `₹${entry.totalPaid}`}
+                        ? formatINR(entry.amountPaid)
+                        : formatINR(entry.totalPaid)}
                     </td>
-                    <td className="border-t border-ash px-2 py-2 text-body text-charcoal">
-                      {entry.type === "order" ? `₹${entry.amountUnpaid}` : ""}
+                    <td className="border-t border-ash px-2 py-2 text-body text-charcoal text-right tabular-nums">
+                      {entry.type === "order" ? formatINR(entry.amountUnpaid) : ""}
                     </td>
                     <td className="border-t border-ash px-2 py-2 text-body">
                       {entry.type === "order" ? (
@@ -1177,6 +1180,7 @@ function CustomerDetails() {
           )}
         </>
       )}
+     </PageContainer>
       <Modal
         isOpen={showPaymentModal}
         onRequestClose={() => setShowPaymentModal(false)}

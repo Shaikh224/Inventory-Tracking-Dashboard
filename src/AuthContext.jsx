@@ -6,11 +6,15 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
+const SKIP_AUTH = import.meta.env.VITE_SKIP_AUTH === 'true';
+
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const [user, setUser] = useState(SKIP_AUTH ? { uid: 'dev-user', email: 'dev@local' } : null);
+  const [loading, setLoading] = useState(!SKIP_AUTH); // Add a loading state
 
   useEffect(() => {
+    if (SKIP_AUTH) return; // Dev-only bypass: skip real Firebase auth entirely
+
     // Listen to Firebase auth state changes
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);

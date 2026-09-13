@@ -6,6 +6,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as XLSX from 'xlsx';
 import { Link } from 'react-router-dom';
+import { formatINR, MONTH_NAMES } from "../lib/format";
+import { PageContainer, PageHeading, EmptyState, Skeleton } from "./ui";
+import { DEMO_MODE, demoOrders } from "../lib/demoData";
 function OrderHistory() {
     const [orders, setOrders] = useState([]);
     const [showPaidOnly, setShowPaidOnly] = useState(false);
@@ -24,6 +27,11 @@ function OrderHistory() {
 
     useEffect(() => {
         const fetchOrders = async () => {
+            if (DEMO_MODE) {
+                setOrders([...demoOrders].sort((a, b) => new Date(b.date) - new Date(a.date)));
+                setLoading(false);
+                return;
+            }
             const ordersCollection = collection(db, "orders");
             const ordersSnapshot = await getDocs(ordersCollection);
             const ordersData = ordersSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
@@ -204,32 +212,21 @@ function OrderHistory() {
         setOrderIdToDelete(orderId);
         setShowDeleteModal(true);
     };
-    const LoadingSpinner = () => (
-        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50 z-50">
-            <svg
-                className="animate-spin h-10 w-10 text-white"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill="currentColor"
-                    d="M12 4V1a1 1 0 011-1h1a1 1 0 011 1v3a1 1 0 01-1 1h-1a1 1 0 01-1-1zM18.767 6.156l-1.732-1 1.732-1a1 1 0 011.414 0l1.732 1-1.732 1a1 1 0 01-1.414 0zM21.303 11h3a1 1 0 011 1v1a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a1 1 0 011-1zM18.767 17.844l-1.732 1 1.732 1a1 1 0 011.414 0l1.732-1-1.732-1a1 1 0 01-1.414 0zM12 20v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-3a1 1 0 011-1h1a1 1 0 011 1zM5.233 17.844l1.732 1-1.732 1a1 1 0 01-1.414 0l-1.732-1 1.732-1a1 1 0 011.414 0zM2.697 13h-3a1 1 0 01-1-1v-1a1 1 0 011-1h3a1 1 0 011 1v1a1 1 0 01-1 1zM5.233 6.156l1.732-1-1.732-1a1 1 0 01-1.414 0l-1.732 1 1.732 1a1 1 0 011.414 0zM12 8a4 4 0 100 8 4 4 0 000-8z"
-                />
-            </svg>
-        </div>
-    );
-  const handleOpenPaymentModal = (order) => {
-        // Do nothing.
-     };
     const getPaymentRecordsForOrder = async (orderId) => {
         const q = query(collection(db, "paymentRecords"), where("orderId", "==", orderId));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     };
 
+    const visibleOrders = filterOrders();
+
     return (
-         <div className="p-4 sm:p-6 bg-paper min-h-screen">
-            {loading && <LoadingSpinner />}
-            <h1 className="text-heading-sm sm:text-heading font-medium mb-6 text-charcoal tracking-tight">Order History</h1>
+         <div className="bg-paper min-h-screen">
+          <PageContainer>
+            <PageHeading
+              title="Order history"
+              subtitle={`${visibleOrders.length} orders in view`}
+            />
              <div className="flex flex-wrap items-center gap-4 mb-6 bg-canvas border border-ash rounded-xl p-4">
                 <div className="flex items-center gap-2">
                     <input
@@ -275,9 +272,9 @@ function OrderHistory() {
                         className="text-body border border-ink rounded-md p-1.5 bg-canvas hover:bg-paper focus:outline-none focus:ring-2 focus:ring-accent"
                     >
                          <option value="">All</option>
-                        {[...Array(12).keys()].map((i) => (
-                            <option key={i + 1} value={i + 1}>
-                                {i + 1}
+                        {MONTH_NAMES.map((name, i) => (
+                            <option key={name} value={i + 1}>
+                                {name}
                             </option>
                         ))}
                     </select>
@@ -302,33 +299,42 @@ function OrderHistory() {
                     </button>
             </div>
 
-            <div className="overflow-x-auto border border-ash rounded-xl">
+            {loading ? (
+                <div className="border border-ash rounded-xl bg-canvas p-4 space-y-2">
+                    {[0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
+                </div>
+            ) : visibleOrders.length === 0 ? (
+                <div className="border border-ash rounded-xl bg-canvas">
+                    <EmptyState title="No orders match these filters" hint="Try a different month, year, or payment status." />
+                </div>
+            ) : (
+            <div className="overflow-x-auto border border-ash rounded-xl bg-canvas">
                 <table className="min-w-full bg-canvas table-auto text-body">
                     <thead>
                         <tr className="text-caption text-fog uppercase tracking-wide">
-                            <th className="border-b border-ash px-3 py-2 text-left">Customer Name</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Total</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Amount Paid</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Amount Unpaid</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Payment Status</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Order Date</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Order Items</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Payment Records</th>
-                            <th className="border-b border-ash px-3 py-2 text-left">Actions</th>
+                            <th className="border-b border-ash px-3 py-2 text-left font-medium">Customer</th>
+                            <th className="border-b border-ash px-3 py-2 text-right font-medium">Total</th>
+                            <th className="border-b border-ash px-3 py-2 text-right font-medium">Paid</th>
+                            <th className="border-b border-ash px-3 py-2 text-right font-medium">Unpaid</th>
+                            <th className="border-b border-ash px-3 py-2 text-left font-medium">Status</th>
+                            <th className="border-b border-ash px-3 py-2 text-left font-medium">Date</th>
+                            <th className="border-b border-ash px-3 py-2 text-left font-medium">Items</th>
+                            <th className="border-b border-ash px-3 py-2 text-left font-medium">Payments</th>
+                            <th className="border-b border-ash px-3 py-2 text-left font-medium">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filterOrders().map((order) => (
+                        {visibleOrders.map((order) => (
                             <tr key={order.id} className="hover:bg-paper transition-colors">
-                                <td className="border-b border-ash px-3 py-2 text-charcoal">{order.customerName}</td>
-                                <td className="border-b border-ash px-3 py-2 text-mint-fg font-medium">
-                                    ₹{order.total.toFixed(2)}
+                                <td className="border-b border-ash px-3 py-2 text-charcoal font-medium">{order.customerName}</td>
+                                <td className="border-b border-ash px-3 py-2 text-charcoal text-right tabular-nums">
+                                    {formatINR(order.total)}
                                 </td>
-                                <td className="border-b border-ash px-3 py-2 text-charcoal">
-                                    {`₹${order.amountPaid.toFixed(2)}`}
+                                <td className="border-b border-ash px-3 py-2 text-charcoal text-right tabular-nums">
+                                    {formatINR(order.amountPaid)}
                                 </td>
-                                <td className="border-b border-ash px-3 py-2 text-red-600">
-                                    ₹{order.amountUnpaid.toFixed(2)}
+                                <td className="border-b border-ash px-3 py-2 text-charcoal text-right tabular-nums">
+                                    {formatINR(order.amountUnpaid)}
                                 </td>
                                  <td className="border-b border-ash px-3 py-2">
                                   {order.paymentStatus === "Paid" ? (
@@ -350,7 +356,7 @@ function OrderHistory() {
                                     {order.items.map((item, index) => (
                                         <div key={index}>
                                             <p>
-                                                {item.productName} - Quantity: {item.quantity} - Price: ₹{item.price}
+                                                {item.productName} · {item.quantity} × {formatINR(item.price)}
                                             </p>
                                         </div>
                                     ))}
@@ -360,7 +366,7 @@ function OrderHistory() {
                                             order.paymentRecords.map((record, index) => (
                                               <div key={index}>
                                                 <p>
-                                                  {record.paymentDate ? new Date(record.paymentDate.toDate()).toLocaleDateString() : ''} - ₹{record.amountPaid}
+                                                  {record.paymentDate ? new Date(record.paymentDate.toDate()).toLocaleDateString() : ''} · {formatINR(record.amountPaid)}
                                                 </p>
                                               </div>
                                             ))
@@ -387,6 +393,8 @@ function OrderHistory() {
                     </tbody>
                 </table>
             </div>
+            )}
+          </PageContainer>
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (

@@ -16,6 +16,9 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import Modal from "react-modal";
 import { v4 as uuidv4 } from 'uuid';
+import { formatINR } from "../lib/format";
+import { PageHeading } from "./ui";
+import { DEMO_MODE, demoCustomers } from "../lib/demoData";
 
 Modal.setAppElement("#root");
 
@@ -357,6 +360,15 @@ function Orders() {
 
     useEffect(() => {
         const fetchData = async () => {
+            if (DEMO_MODE) {
+                setCustomers(demoCustomers);
+                setProducts([
+                    { id: "d1", name: "Mustard Oil 1L", quantity: 240, price: 185 },
+                    { id: "d2", name: "Mustard Oil 5L", quantity: 64, price: 880 },
+                    { id: "d5", name: "Groundnut Oil 2L", quantity: 120, price: 420 },
+                ]);
+                return;
+            }
             const customersSnapshot = await getDocs(collection(db, "customers"));
             const productsSnapshot = await getDocs(collection(db, "inventory"));
             setCustomers(
@@ -587,9 +599,11 @@ function Orders() {
 
 
     return (
-        <div className="p-6 bg-canvas rounded-xl border border-ash max-w-lg mx-auto my-8">
+        <div className="bg-paper min-h-screen">
+          <div className="max-w-[640px] mx-auto px-4 sm:px-6 py-6">
             <ToastContainer />
-            <h2 className="text-heading-sm font-medium mb-6 text-center text-charcoal tracking-tight">Create Order</h2>
+            <PageHeading title="Create order" subtitle="Select a customer and the products they're buying." />
+            <div className="p-5 bg-canvas rounded-xl border border-ash">
             <form onSubmit={handleCreateOrder} className="space-y-4">
             <div className="mb-1">
                     <label className="block text-caption font-medium text-steel mb-1">
@@ -650,7 +664,7 @@ function Orders() {
                                 </div>
                                 <div className="text-body text-steel ml-auto flex items-center gap-2">
                                     <span>Stock: {product.quantity}</span>
-                                    <span>₹{product.price}</span>
+                                    <span className="tabular-nums">{formatINR(product.price)}</span>
                                     <input
                                         type="number"
                                         min="1"
@@ -668,8 +682,8 @@ function Orders() {
                     <label className="block text-caption font-medium text-steel mb-1">
                         Total Amount
                     </label>
-                    <div className="border border-ash rounded-md p-2 w-full text-right font-medium text-mint-fg bg-paper">
-                        ₹{totalOrderAmount}
+                    <div className="border border-ash rounded-md p-2 w-full text-right font-semibold text-charcoal bg-paper tabular-nums">
+                        {formatINR(totalOrderAmount)}
                     </div>
                 </div>
                 <div className="mb-1">
@@ -714,12 +728,14 @@ function Orders() {
                     )}
                 </button>
             </form>
+            </div>
             <BillModal
                 isOpen={isBillModalOpen}
                 onClose={() => setIsBillModalOpen(false)}
                 order={currentOrder}
                 style={modalStyles}
             />
+          </div>
         </div>
     );
 }
