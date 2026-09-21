@@ -13,3 +13,17 @@ body {
 input, select, textarea, button {
   font-family: inherit;
 }
+
+/* react-modal drops its own default inline styles once overlayClassName /
+   className are supplied, so the positioning it normally injects has to be
+   declared here. The per-modal `style` prop still layers on top of these. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+}
+
+.modal {
+  position: relative;
+  background: #ffffff;
+  outline: none;
+}
