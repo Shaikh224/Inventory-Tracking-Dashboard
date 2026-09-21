@@ -6,13 +6,22 @@ import autoTableModule from "jspdf-autotable";
 const autoTable =
   typeof autoTableModule === "function" ? autoTableModule : autoTableModule.default;
 
+// Letterhead printed on every invoice and statement. Set these in .env so the
+// deployment carries its own details and the repo carries none.
+const env = import.meta.env;
+
 export const COMPANY = {
-  name: "STA Foods & Oils Co.",
-  tagline: "Hindola Mustard Oil",
-  address: "Sanjarpur, Azamgarh, Uttar Pradesh",
-  phone: "+91 99534 10116",
-  email: "stafoodsoils@gmail.com",
+  name: env.VITE_COMPANY_NAME || "Your Company Name",
+  tagline: env.VITE_COMPANY_TAGLINE || "",
+  address: env.VITE_COMPANY_ADDRESS || "Company address",
+  phone: env.VITE_COMPANY_PHONE || "",
+  email: env.VITE_COMPANY_EMAIL || "",
 };
+
+// Any of the optional letterhead fields may be blank, so drop the separator
+// rather than printing a dangling one.
+const letterheadLine = (...parts) => parts.filter(Boolean).join("  |  ");
+const dotJoin = (...parts) => parts.filter(Boolean).join("  ·  ");
 
 // jsPDF's built-in fonts are WinAnsi-encoded and have no glyph for U+20B9,
 // so the rupee sign would render as a blank box. "Rs." is the standard fallback.
@@ -96,8 +105,8 @@ const drawHeader = (doc, { title, subtitle }) => {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(200, 200, 200);
-  doc.text(`${COMPANY.tagline}  |  ${COMPANY.address}`, 14, 20);
-  doc.text(`${COMPANY.phone}  |  ${COMPANY.email}`, 14, 25);
+  doc.text(letterheadLine(COMPANY.tagline, COMPANY.address), 14, 20);
+  doc.text(letterheadLine(COMPANY.phone, COMPANY.email), 14, 25);
 
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -322,7 +331,7 @@ export const buildInvoice = (order, { variant = "detailed", customer } = {}) => 
   doc.setTextColor(...FOG);
   doc.text(`For ${COMPANY.name}`, W - 14, y + 31, { align: "right" });
 
-  drawFooter(doc, `Thank you for your business  ·  ${COMPANY.email}`);
+  drawFooter(doc, dotJoin("Thank you for your business", COMPANY.email));
   return doc;
 };
 
@@ -435,7 +444,7 @@ export const buildStatement = ({ customer, entries, totals, period }) => {
   doc.setTextColor(...INK);
   doc.text(doc.splitTextToSize(amountInWords(outstanding), W - 28), 14, y + 5);
 
-  drawFooter(doc, `Statement for ${customer?.name ?? "customer"}  ·  ${COMPANY.phone}`);
+  drawFooter(doc, dotJoin(`Statement for ${customer?.name ?? "customer"}`, COMPANY.phone));
   return doc;
 };
 

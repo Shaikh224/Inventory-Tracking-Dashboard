@@ -44,10 +44,10 @@ const InvoicePreview = ({ order, customer, variant }) => {
                 <div>
                     <p className="text-body-lg font-semibold">{COMPANY.name}</p>
                     <p className="text-caption text-silver mt-1">
-                        {COMPANY.tagline} · {COMPANY.address}
+                        {[COMPANY.tagline, COMPANY.address].filter(Boolean).join(" · ")}
                     </p>
                     <p className="text-caption text-silver">
-                        {COMPANY.phone} · {COMPANY.email}
+                        {[COMPANY.phone, COMPANY.email].filter(Boolean).join(" · ")}
                     </p>
                 </div>
                 <div className="text-right shrink-0">

@@ -167,6 +167,19 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=000000000000
 VITE_FIREBASE_APP_ID=1:000000000000:web:abcdef
 ```
 
+Invoices and statements print a letterhead. It is read from the environment so the repo
+carries no business details of its own — set these to your own, or leave them out for
+neutral placeholders. Blank optional fields are dropped rather than printed as empty
+separators:
+
+```ini
+VITE_COMPANY_NAME=Your Company Name
+VITE_COMPANY_TAGLINE=Optional strapline
+VITE_COMPANY_ADDRESS=Street, City, State
+VITE_COMPANY_PHONE=+00 00000 00000
+VITE_COMPANY_EMAIL=billing@example.com
+```
+
 Firestore uses four collections — `inventory`, `customers`, `orders` and `expenses` — each
 created on first write, so there is no schema to set up in advance.
 
